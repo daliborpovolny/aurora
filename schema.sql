@@ -1,0 +1,41 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  first_name  TEXT NOT NULL,
+  last_name   TEXT NOT NULL,
+  hash        TEXT NOT NULL,
+  email       TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS students (
+  id       INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id  INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS teachers (
+  id       INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id  INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS admins (
+  id       INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id  INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS parents (
+  id       INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id  INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS student_parent (
+  student_id INTEGER,
+  parent_id INTEGER,
+  PRIMARY KEY (student_id, parent_id),
+  FOREIGN KEY (student_id) REFERENCES Students(student_id),
+  FOREIGN KEY (parent_id) REFERENCES Parents(parent_id)
+);
