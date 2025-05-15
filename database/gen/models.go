@@ -9,34 +9,34 @@ import (
 )
 
 type Admin struct {
-	ID     int64
-	UserID int64
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
 }
 
 type Parent struct {
-	ID     int64
-	UserID int64
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
 }
 
 type Student struct {
-	ID     int64
-	UserID int64
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
 }
 
 type StudentParent struct {
-	StudentID sql.NullInt64
-	ParentID  sql.NullInt64
+	StudentID sql.NullInt64 `json:"student_id"`
+	ParentID  sql.NullInt64 `json:"parent_id"`
 }
 
 type Teacher struct {
-	ID     int64
-	UserID int64
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
 }
 
 type User struct {
-	ID        int64
-	FirstName string
-	LastName  string
-	Hash      string
-	Email     string
+	ID        int64  `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Hash      string `json:"hash"`
+	Email     string `json:"email"`
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,6 +13,8 @@ import (
 
 	database "aurora/database/gen"
 )
+
+var resetDB bool = false
 
 //go:embed schema.sql
 var ddl string
@@ -22,7 +25,7 @@ var ctx context.Context
 func home(w http.ResponseWriter, r *http.Request) {
 
 	var n int
-	as, err := queries.ListAuthors(ctx)
+	as, err := queries.ListUsers(ctx)
 	if err != nil {
 		n = -1
 	}
@@ -31,8 +34,24 @@ func home(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, World!, n: %d", n)
 }
 
+func getUsers(h publicHandler, w http.ResponseWriter, r *http.Request) {
+	users, err := h.q.ListUsers(h.ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(users)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	os.Remove("./database/db_file.db")
+	if resetDB {
+		os.Remove("./database/db_file.db")
+	}
 
 	ctx = context.Background()
 
@@ -52,10 +71,11 @@ func main() {
 	r := NewRouter()
 
 	r.GET("/home", home)
+	r.GET("/api/v1/users", newPublicHandler(getUsers))
 
 	s := &http.Server{
 		Handler: r.ServeMux,
-		Addr:    ":8080",
+		Addr:    ":8081",
 	}
 
 	err = s.ListenAndServe()

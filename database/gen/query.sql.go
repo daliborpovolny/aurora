@@ -19,8 +19,8 @@ INSERT INTO student_parent (
 `
 
 type AssignStudentToParentParams struct {
-	ParentID  sql.NullInt64
-	StudentID sql.NullInt64
+	ParentID  sql.NullInt64 `json:"parent_id"`
+	StudentID sql.NullInt64 `json:"student_id"`
 }
 
 func (q *Queries) AssignStudentToParent(ctx context.Context, arg AssignStudentToParentParams) error {
@@ -98,10 +98,10 @@ RETURNING id, first_name, last_name, hash, email
 `
 
 type CreateUserParams struct {
-	FirstName string
-	LastName  string
-	Email     string
-	Hash      string
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Hash      string `json:"hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {

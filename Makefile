@@ -8,6 +8,9 @@ run:
 	@go build
 	@./aurora
 	@go clean
-
 sql:
-	sqlc generate
+	@sqlc generate
+templ:
+	@templ generate
+air:
+	@air -build.cmd "make" -build.exclude_dir database/gen
