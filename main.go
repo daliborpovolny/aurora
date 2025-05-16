@@ -15,6 +15,7 @@ import (
 )
 
 var resetDB bool = false
+var port string = "8000"
 
 //go:embed schema.sql
 var ddl string
@@ -75,8 +76,10 @@ func main() {
 
 	s := &http.Server{
 		Handler: r.ServeMux,
-		Addr:    ":8081",
+		Addr:    ":" + port,
 	}
+
+	fmt.Println("listing on ", s.Addr)
 
 	err = s.ListenAndServe()
 	if err != nil {
