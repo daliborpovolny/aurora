@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,10 +11,11 @@ import (
 	_ "modernc.org/sqlite"
 
 	database "aurora/database/gen"
+	"aurora/templates"
 )
 
 var resetDB bool = true
-var port string = "8002"
+var port string = "8004"
 var apiPrefix string = "/api/v1"
 
 //go:embed schema.sql
@@ -26,103 +26,8 @@ var ctx context.Context
 
 func home(w http.ResponseWriter, r *http.Request) {
 
-	var n int
-	as, err := queries.ListUsers(ctx)
-	if err != nil {
-		n = -1
-	}
-	n = len(as)
-
-	fmt.Fprintf(w, "Hello, Worlds!, n: %d", n)
-}
-
-func getUsers(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	users, err := h.q.ListUsers(h.ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	if users == nil {
-		users = []database.User{}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(users)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func getStudents(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	students, err := h.q.ListStudents(h.ctx)
-	if err != nil {
-		panic(err)
-	}
-	if students == nil {
-		students = []database.ListStudentsRow{}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(students)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func getTeachers(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	teachers, err := h.q.ListTeachers(h.ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	if teachers == nil {
-		teachers = []database.ListTeachersRow{}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(teachers)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func getParents(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	parents, err := h.q.ListParents(h.ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	if parents == nil {
-		parents = []database.ListParentsRow{}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(parents)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func getAdmins(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	admins, err := h.q.ListAdmins(h.ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	if admins == nil {
-		admins = []database.ListAdminsRow{}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(admins)
-	if err != nil {
-		panic(err)
-	}
+	cmp := templates.Home()
+	cmp.Render(r.Context(), w)
 }
 
 func main() {
@@ -187,13 +92,19 @@ func main() {
 
 	r := NewRouter()
 
-	r.GET("/home", home)
+	r.GET("/", home)
 
 	r.GET(apiPrefix+"/users", newPublicHandler(getUsers))
 	r.GET(apiPrefix+"/students", newPublicHandler(getStudents))
 	r.GET(apiPrefix+"/teachers", newPublicHandler(getTeachers))
 	r.GET(apiPrefix+"/admins", newPublicHandler(getAdmins))
 	r.GET(apiPrefix+"/parents", newPublicHandler(getParents))
+
+	r.GET("/users", newPublicHandler(viewUsers))
+	r.GET("/students", newPublicHandler(viewStudents))
+	r.GET("/teachers", newPublicHandler(viewTeachers))
+	r.GET("/parents", newPublicHandler(viewParents))
+	r.GET("/admins", newPublicHandler(viewAdmins))
 
 	s := &http.Server{
 		Handler: r.ServeMux,

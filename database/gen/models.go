@@ -14,6 +14,14 @@ type Parent struct {
 	UserID int64 `json:"user_id"`
 }
 
+type Session struct {
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	Cookie    string `json:"cookie"`
+	CreatedAt int64  `json:"created_at"`
+	ExpiresAt int64  `json:"expires_at"`
+}
+
 type Student struct {
 	ID     int64 `json:"id"`
 	UserID int64 `json:"user_id"`

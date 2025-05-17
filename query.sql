@@ -7,6 +7,18 @@ WHERE id = ? LIMIT 1;
 SELECT * FROM users
 WHERE email = ?;
 
+-- name: GetUserBySessionCookie :one
+SELECT * FROM users
+JOIN sessions on users.id = sessions.user_id
+WHERE sessions.cookie = ?;
+
+-- name: CreateSession :one
+INSERT INTO sessions (
+    user_id, cookie, created_at, expires_at
+) VALUES (
+    ?, ?, ?, ?
+) RETURNING *;
+
 -- name: ListUsers :many
 SELECT * FROM users;
 

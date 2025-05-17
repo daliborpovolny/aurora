@@ -57,6 +57,39 @@ func (q *Queries) CreateParent(ctx context.Context, userID int64) (Parent, error
 	return i, err
 }
 
+const createSession = `-- name: CreateSession :one
+INSERT INTO sessions (
+    user_id, cookie, created_at, expires_at
+) VALUES (
+    ?, ?, ?, ?
+) RETURNING id, user_id, cookie, created_at, expires_at
+`
+
+type CreateSessionParams struct {
+	UserID    int64  `json:"user_id"`
+	Cookie    string `json:"cookie"`
+	CreatedAt int64  `json:"created_at"`
+	ExpiresAt int64  `json:"expires_at"`
+}
+
+func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
+	row := q.db.QueryRowContext(ctx, createSession,
+		arg.UserID,
+		arg.Cookie,
+		arg.CreatedAt,
+		arg.ExpiresAt,
+	)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Cookie,
+		&i.CreatedAt,
+		&i.ExpiresAt,
+	)
+	return i, err
+}
+
 const createStudent = `-- name: CreateStudent :one
 INSERT INTO students (
     user_id
@@ -335,6 +368,43 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.LastName,
 		&i.Hash,
 		&i.Email,
+	)
+	return i, err
+}
+
+const getUserBySessionCookie = `-- name: GetUserBySessionCookie :one
+SELECT users.id, first_name, last_name, hash, email, sessions.id, user_id, cookie, created_at, expires_at FROM users
+JOIN sessions on users.id = sessions.user_id
+WHERE sessions.cookie = ?
+`
+
+type GetUserBySessionCookieRow struct {
+	ID        int64  `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Hash      string `json:"hash"`
+	Email     string `json:"email"`
+	ID_2      int64  `json:"id_2"`
+	UserID    int64  `json:"user_id"`
+	Cookie    string `json:"cookie"`
+	CreatedAt int64  `json:"created_at"`
+	ExpiresAt int64  `json:"expires_at"`
+}
+
+func (q *Queries) GetUserBySessionCookie(ctx context.Context, cookie string) (GetUserBySessionCookieRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserBySessionCookie, cookie)
+	var i GetUserBySessionCookieRow
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Hash,
+		&i.Email,
+		&i.ID_2,
+		&i.UserID,
+		&i.Cookie,
+		&i.CreatedAt,
+		&i.ExpiresAt,
 	)
 	return i, err
 }

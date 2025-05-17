@@ -1,0 +1,144 @@
+package templates
+
+import "time"
+
+import database "aurora/database/gen"
+
+templ Header(title string) {
+    <head>
+        <title>{ title }</title>
+        <script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-TODO" crossorigin="anonymous"></script> 
+
+
+        <h2>Aurora</h2>
+        @Navbar()
+    </head>
+}
+
+var year = time.Now().Year()
+
+templ Footer() {
+    <footer>
+        <p>No rights reserved, { year }</p>
+    </footer>
+}
+
+templ Home() {
+    @Header("home")
+    <body>
+        <h1>Welcome to Aurora</h1>
+
+
+    </body>
+    @Footer()
+}
+
+templ Navbar() {
+    <div>
+        <a href="/users">Users</a>
+        <a href="/students">Students</a>
+        <a href="/teachers">Teachers</a>
+        <a href="/admins">Admins</a>
+    </div>
+}
+
+templ ListUsers(users []database.User) {
+    @Header("Users")
+    <div>
+        <h3>Users</h3>
+        <ul>
+        for _, item := range users {
+            <li>
+                { item.FirstName } { item.LastName } { item.Email } { item.Hash }
+            </li>
+        }
+        
+        </ul>
+    </div>
+    @Footer()
+}
+
+templ ListStudents(students []database.ListStudentsRow) {
+    @Header("Students")
+    <div>
+        <h3>Students</h3>
+        <ul>
+        for _, item := range students {
+            <li>
+                { item.FirstName } { item.LastName } { item.Email }
+            </li>
+        }
+        
+        </ul>
+    </div>
+    @Footer()
+}
+
+templ ListTeachers(teachers []database.ListTeachersRow) {
+    @Header("Teachers")
+    <div>
+        <h3>Teachers</h3>
+        <ul>
+        for _, item := range teachers {
+            <li>
+                { item.FirstName } { item.LastName } { item.Email }
+            </li>
+        }
+        
+        </ul>
+    </div>
+    @Footer()
+}
+
+templ ListParents(parents []database.ListParentsRow) {
+    @Header("Parents")
+    <div>
+        <h3>Parents</h3>
+        <ul>
+        for _, item := range parents {
+            <li>
+                { item.FirstName } { item.LastName } { item.Email }
+            </li>
+        }
+        
+        </ul>
+    </div>
+    @Footer()
+
+}
+
+templ ListAdmins(admins []database.ListAdminsRow) {
+    @Header("admins")
+    <div>
+        <h3>Admins</h3>
+        <ul>
+        for _, item := range admins {
+            <li>
+                { item.FirstName } { item.LastName } { item.Email }
+            </li>
+        }
+        
+        </ul>
+    </div>
+    @Footer()
+}
+
+templ Register() {
+    @Header("register")
+    <body>
+        <form>
+            <label for="fname">First name:</label><br>
+            <input type="text" id="fname" name="fname"><br>
+            
+            <label for="lname">Last name:</label><br>
+            <input type="text" id="lname" name="lname">     
+        
+            <label for="email">Email:</label><br>
+            <input type="email" id="email"><br>
+
+            <label for="pswd">Password:</label><br>
+            <input type="password" id="pswd"><br>
+        </form>
+    </body>
+    @Footer()
+}
