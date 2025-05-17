@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS parents (
 );
 
 CREATE TABLE IF NOT EXISTS student_parent (
-  student_id INTEGER,
-  parent_id INTEGER,
+  student_id INTEGER NOT NULL,
+  parent_id INTEGER NOT NULL,
   PRIMARY KEY (student_id, parent_id),
-  FOREIGN KEY (student_id) REFERENCES Students(student_id),
-  FOREIGN KEY (parent_id) REFERENCES Parents(parent_id)
+  FOREIGN KEY (student_id) REFERENCES students(id),
+  FOREIGN KEY (parent_id) REFERENCES parents(id)
 );

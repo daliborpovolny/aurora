@@ -7,7 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 )
 
 const assignStudentToParent = `-- name: AssignStudentToParent :exec
@@ -19,8 +18,8 @@ INSERT INTO student_parent (
 `
 
 type AssignStudentToParentParams struct {
-	ParentID  sql.NullInt64 `json:"parent_id"`
-	StudentID sql.NullInt64 `json:"student_id"`
+	ParentID  int64 `json:"parent_id"`
+	StudentID int64 `json:"student_id"`
 }
 
 func (q *Queries) AssignStudentToParent(ctx context.Context, arg AssignStudentToParentParams) error {
@@ -28,7 +27,7 @@ func (q *Queries) AssignStudentToParent(ctx context.Context, arg AssignStudentTo
 	return err
 }
 
-const createAdmins = `-- name: CreateAdmins :one
+const createAdmin = `-- name: CreateAdmin :one
 INSERT INTO admins (
     user_id
 ) VALUES (
@@ -36,8 +35,8 @@ INSERT INTO admins (
 ) RETURNING id, user_id
 `
 
-func (q *Queries) CreateAdmins(ctx context.Context, userID int64) (Admin, error) {
-	row := q.db.QueryRowContext(ctx, createAdmins, userID)
+func (q *Queries) CreateAdmin(ctx context.Context, userID int64) (Admin, error) {
+	row := q.db.QueryRowContext(ctx, createAdmin, userID)
 	var i Admin
 	err := row.Scan(&i.ID, &i.UserID)
 	return i, err
@@ -122,51 +121,185 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
-const getAdmins = `-- name: GetAdmins :one
-SELECT id, user_id FROM admins
-WHERE id = ?
+const getAdmin = `-- name: GetAdmin :one
+SELECT
+    admins.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM admins
+JOIN users on admins.user_id = users.id
+WHERE admins.id = ?
 `
 
-func (q *Queries) GetAdmins(ctx context.Context, id int64) (Admin, error) {
-	row := q.db.QueryRowContext(ctx, getAdmins, id)
-	var i Admin
-	err := row.Scan(&i.ID, &i.UserID)
+type GetAdminRow struct {
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) GetAdmin(ctx context.Context, id int64) (GetAdminRow, error) {
+	row := q.db.QueryRowContext(ctx, getAdmin, id)
+	var i GetAdminRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+	)
 	return i, err
 }
 
-const getParents = `-- name: GetParents :one
-SELECT id, user_id FROM parents
-WHERE id = ?
+const getParent = `-- name: GetParent :one
+SELECT
+    parents.id,
+    users.id AS users_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM parents
+JOIN users on parents.user_id = users.id
+WHERE parents.id = ?
 `
 
-func (q *Queries) GetParents(ctx context.Context, id int64) (Parent, error) {
-	row := q.db.QueryRowContext(ctx, getParents, id)
-	var i Parent
-	err := row.Scan(&i.ID, &i.UserID)
+type GetParentRow struct {
+	ID        int64  `json:"id"`
+	UsersID   int64  `json:"users_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) GetParent(ctx context.Context, id int64) (GetParentRow, error) {
+	row := q.db.QueryRowContext(ctx, getParent, id)
+	var i GetParentRow
+	err := row.Scan(
+		&i.ID,
+		&i.UsersID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+	)
 	return i, err
 }
 
 const getStudent = `-- name: GetStudent :one
-SELECT id, user_id FROM students
-WHERE id = ?
+SELECT 
+    students.id,
+    users.id AS user_id,
+    users.first_name, 
+    users.last_name, 
+    users.email
+FROM students
+JOIN users ON students.user_id = users.id
+WHERE students.id = ?
 `
 
-func (q *Queries) GetStudent(ctx context.Context, id int64) (Student, error) {
+type GetStudentRow struct {
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) GetStudent(ctx context.Context, id int64) (GetStudentRow, error) {
 	row := q.db.QueryRowContext(ctx, getStudent, id)
-	var i Student
-	err := row.Scan(&i.ID, &i.UserID)
+	var i GetStudentRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+	)
 	return i, err
 }
 
-const getTeachers = `-- name: GetTeachers :one
-SELECT id, user_id FROM teachers
-WHERE id = ?
+const getStudentsOfParent = `-- name: GetStudentsOfParent :many
+SELECT
+    students.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM student_parent
+JOIN students on student_parent.student_id = students.id
+JOIN users on students.user_id = users.id
+WHERE student_parent.parent_id = ?
 `
 
-func (q *Queries) GetTeachers(ctx context.Context, id int64) (Teacher, error) {
-	row := q.db.QueryRowContext(ctx, getTeachers, id)
-	var i Teacher
-	err := row.Scan(&i.ID, &i.UserID)
+type GetStudentsOfParentRow struct {
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) GetStudentsOfParent(ctx context.Context, parentID int64) ([]GetStudentsOfParentRow, error) {
+	rows, err := q.db.QueryContext(ctx, getStudentsOfParent, parentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetStudentsOfParentRow
+	for rows.Next() {
+		var i GetStudentsOfParentRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTeacher = `-- name: GetTeacher :one
+SELECT
+    teachers.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM teachers
+JOIN users ON teacher.user_id = users.id
+WHERE teachers.id = ?
+`
+
+type GetTeacherRow struct {
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) GetTeacher(ctx context.Context, id int64) (GetTeacherRow, error) {
+	row := q.db.QueryRowContext(ctx, getTeacher, id)
+	var i GetTeacherRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+	)
 	return i, err
 }
 
@@ -207,19 +340,40 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const listAdmins = `-- name: ListAdmins :many
-SELECT id, user_id FROM admins
+SELECT
+    admins.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM admins
+JOIN users on admins.user_id = users.id
 `
 
-func (q *Queries) ListAdmins(ctx context.Context) ([]Admin, error) {
+type ListAdminsRow struct {
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) ListAdmins(ctx context.Context) ([]ListAdminsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listAdmins)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Admin
+	var items []ListAdminsRow
 	for rows.Next() {
-		var i Admin
-		if err := rows.Scan(&i.ID, &i.UserID); err != nil {
+		var i ListAdminsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -234,19 +388,40 @@ func (q *Queries) ListAdmins(ctx context.Context) ([]Admin, error) {
 }
 
 const listParents = `-- name: ListParents :many
-SELECT id, user_id FROM parents
+SELECT
+    parents.id,
+    users.id AS users_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM parents
+JOIN users on parents.user_id = users.id
 `
 
-func (q *Queries) ListParents(ctx context.Context) ([]Parent, error) {
+type ListParentsRow struct {
+	ID        int64  `json:"id"`
+	UsersID   int64  `json:"users_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) ListParents(ctx context.Context) ([]ListParentsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listParents)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Parent
+	var items []ListParentsRow
 	for rows.Next() {
-		var i Parent
-		if err := rows.Scan(&i.ID, &i.UserID); err != nil {
+		var i ListParentsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UsersID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -261,19 +436,40 @@ func (q *Queries) ListParents(ctx context.Context) ([]Parent, error) {
 }
 
 const listStudents = `-- name: ListStudents :many
-SELECT id, user_id FROM students
+SELECT 
+    students.id,
+    users.id AS user_id,
+    users.first_name, 
+    users.last_name, 
+    users.email
+FROM students
+JOIN users ON students.user_id = users.id
 `
 
-func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
+type ListStudentsRow struct {
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) ListStudents(ctx context.Context) ([]ListStudentsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listStudents)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Student
+	var items []ListStudentsRow
 	for rows.Next() {
-		var i Student
-		if err := rows.Scan(&i.ID, &i.UserID); err != nil {
+		var i ListStudentsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -288,19 +484,40 @@ func (q *Queries) ListStudents(ctx context.Context) ([]Student, error) {
 }
 
 const listTeachers = `-- name: ListTeachers :many
-SELECT id, user_id FROM teachers
+SELECT
+    teachers.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM teachers
+JOIN users ON teachers.user_id = users.id
 `
 
-func (q *Queries) ListTeachers(ctx context.Context) ([]Teacher, error) {
+type ListTeachersRow struct {
+	ID        int64  `json:"id"`
+	UserID    int64  `json:"user_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
+
+func (q *Queries) ListTeachers(ctx context.Context) ([]ListTeachersRow, error) {
 	rows, err := q.db.QueryContext(ctx, listTeachers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Teacher
+	var items []ListTeachersRow
 	for rows.Next() {
-		var i Teacher
-		if err := rows.Scan(&i.ID, &i.UserID); err != nil {
+		var i ListTeachersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -4,10 +4,6 @@
 
 package database
 
-import (
-	"database/sql"
-)
-
 type Admin struct {
 	ID     int64 `json:"id"`
 	UserID int64 `json:"user_id"`
@@ -24,8 +20,8 @@ type Student struct {
 }
 
 type StudentParent struct {
-	StudentID sql.NullInt64 `json:"student_id"`
-	ParentID  sql.NullInt64 `json:"parent_id"`
+	StudentID int64 `json:"student_id"`
+	ParentID  int64 `json:"parent_id"`
 }
 
 type Teacher struct {

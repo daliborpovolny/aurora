@@ -1,16 +1,16 @@
 DEFAULT_GOAL := run
 
 run:
-	@sqlc generate
-	@templ generate
-	@go fmt
-	@go vet
-	@go build
-	./aurora
-	@go clean
+	sqlc generate
+	templ generate
+	go fmt
+	go vet
+	go build
 sql:
-	@sqlc generate
+	sqlc generate
 templ:
-	@templ generate
+	templ generate
 air:
-	@air -build.cmd "make" -build.exclude_dir database/gen -c air.toml
+	air -c air.toml
+clean:
+	go clean

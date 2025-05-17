@@ -1,1 +1,10 @@
-exclude_regex = ["_templ\\.go"]
+
+
+build.exclude_regex = ["_templ\\.go"]
+build.cmd = "make run"
+build.exclude_dir = ["database/gen"]
+build.bin = "./aurora"
+build.post_cmd = ["go clean"]
+
+[misc]
+clean_on_exit = true

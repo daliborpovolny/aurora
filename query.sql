@@ -19,11 +19,25 @@ INSERT INTO users (
 RETURNING *;
 
 -- name: GetStudent :one
-SELECT * FROM students
-WHERE id = ?;
+SELECT 
+    students.id,
+    users.id AS user_id,
+    users.first_name, 
+    users.last_name, 
+    users.email
+FROM students
+JOIN users ON students.user_id = users.id
+WHERE students.id = ?;
 
 -- name: ListStudents :many
-SELECT * FROM students;
+SELECT 
+    students.id,
+    users.id AS user_id,
+    users.first_name, 
+    users.last_name, 
+    users.email
+FROM students
+JOIN users ON students.user_id = users.id;
 
 -- name: CreateStudent :one
 INSERT INTO students (
@@ -32,12 +46,26 @@ INSERT INTO students (
     ?
 ) RETURNING *;
 
--- name: GetTeachers :one
-SELECT * FROM teachers
-WHERE id = ?;
+-- name: GetTeacher :one
+SELECT
+    teachers.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM teachers
+JOIN users ON teacher.user_id = users.id
+WHERE teachers.id = ?;
 
 -- name: ListTeachers :many
-SELECT * FROM teachers;
+SELECT
+    teachers.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM teachers
+JOIN users ON teachers.user_id = users.id;
 
 -- name: CreateTeacher :one
 INSERT INTO teachers (
@@ -46,12 +74,26 @@ INSERT INTO teachers (
     ?
 ) RETURNING *;
 
--- name: GetParents :one
-SELECT * FROM parents
-WHERE id = ?;
+-- name: GetParent :one
+SELECT
+    parents.id,
+    users.id AS users_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM parents
+JOIN users on parents.user_id = users.id
+WHERE parents.id = ?;
 
 -- name: ListParents :many
-SELECT * FROM parents;
+SELECT
+    parents.id,
+    users.id AS users_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM parents
+JOIN users on parents.user_id = users.id;
 
 -- name: CreateParent :one
 INSERT INTO parents (
@@ -67,14 +109,40 @@ INSERT INTO student_parent (
     ?, ?
 );
 
--- name: GetAdmins :one
-SELECT * FROM admins
-WHERE id = ?;
+-- name: GetStudentsOfParent :many
+SELECT
+    students.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM student_parent
+JOIN students on student_parent.student_id = students.id
+JOIN users on students.user_id = users.id
+WHERE student_parent.parent_id = ?;
+
+-- name: GetAdmin :one
+SELECT
+    admins.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM admins
+JOIN users on admins.user_id = users.id
+WHERE admins.id = ?;
 
 -- name: ListAdmins :many
-SELECT * FROM admins;
+SELECT
+    admins.id,
+    users.id AS user_id,
+    users.first_name,
+    users.last_name,
+    users.email
+FROM admins
+JOIN users on admins.user_id = users.id;
 
--- name: CreateAdmins :one
+-- name: CreateAdmin :one
 INSERT INTO admins (
     user_id
 ) VALUES (
