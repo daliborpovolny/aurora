@@ -17,8 +17,9 @@ import (
 var resetDB bool = true
 var port string = "8004"
 var apiPrefix string = "/api/v1"
+var isDeployed bool = false
 
-//go:embed schema.sql
+//go:embed database/schema.sql
 var ddl string
 
 var queries *database.Queries
@@ -105,6 +106,8 @@ func main() {
 	r.GET("/teachers", newPublicHandler(viewTeachers))
 	r.GET("/parents", newPublicHandler(viewParents))
 	r.GET("/admins", newPublicHandler(viewAdmins))
+
+	r.GET("/register", newPublicHandler(register))
 
 	s := &http.Server{
 		Handler: r.ServeMux,

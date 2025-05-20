@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	database "aurora/database/gen"
 	templates "aurora/templates"
@@ -167,4 +169,60 @@ func getAdmins(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+//* auth
+
+type registerParams struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+
+func register(h publicHandler, w http.ResponseWriter, r *http.Request) {
+
+	var params registerParams
+	err := Decode(r, &params)
+	if err != nil {
+		http.Error(w, "Failed to parse parameters", http.StatusBadRequest)
+		return
+	}
+
+	if params.FirstName == "" || params.LastName == "" || params.Email == "" || params.Password == "" {
+		http.Error(w, "Missing parameter", http.StatusBadRequest)
+		return
+	}
+
+	hash, err := hashPassword(params.Password)
+	if err != nil {
+		fmt.Println("cannot hash")
+		http.Error(w, "Unhashable password", http.StatusBadRequest)
+		return
+	}
+
+	h.q.CreateUser(h.ctx, database.CreateUserParams{
+		FirstName: params.FirstName,
+		LastName:  params.LastName,
+		Email:     params.Email,
+		Hash:      hash,
+	})
+
+	value, err := NewSessionCookie()
+	if err != nil {
+		fmt.Println("cannot generate cookie")
+		http.Error(w, "Server Error", http.StatusInternalServerError)
+	}
+
+	cookie := http.Cookie{
+		Name:     "session_cookie",
+		Value:    value,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   isDeployed,
+		Expires:  time.Now().Add(time.Hour * 7 * 24),
+	}
+
+	http.SetCookie(w, &cookie)
+	fmt.Fprint(w, "Registered and set cookie")
 }
