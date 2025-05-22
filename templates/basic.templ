@@ -160,3 +160,16 @@ templ Login() {
     </body>
     @Footer()
 }
+
+templ StudentInfo(s database.GetStudentRow) {
+    @Header("student: " + s.FirstName + s.LastName)
+
+    <body>
+        <div>
+            <h2>Student: { s.FirstName + s.LastName }</h2>
+
+
+        </div>
+    
+    </body>
+}
