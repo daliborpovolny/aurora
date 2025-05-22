@@ -39,6 +39,8 @@ SELECT
     users.email
 FROM students
 JOIN users ON students.user_id = users.id
+JOIN student_parent ON student_parent.student_id = ?
+JOIN parents ON parents.id = student_parent.parent_id
 WHERE students.id = ?;
 
 -- name: ListStudents :many
