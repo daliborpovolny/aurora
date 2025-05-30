@@ -6,7 +6,7 @@ run:
 	go fmt
 	go vet
 	go build
-sql:
+sqlc:
 	sqlc generate
 templ:
 	templ generate
