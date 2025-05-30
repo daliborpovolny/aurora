@@ -39,6 +39,8 @@ templ Navbar() {
         <a href="/students">Students</a>
         <a href="/teachers">Teachers</a>
         <a href="/admins">Admins</a>
+        <a href="/register">Register</a>
+        <a href="/login">Log In</a>
     </div>
 }
 
@@ -47,9 +49,9 @@ templ ListUsers(users []database.User) {
     <div>
         <h3>Users</h3>
         <ul>
-        for _, item := range users {
+        for _, user := range users {
             <li>
-                { item.FirstName } { item.LastName } { item.Email } { item.Hash }
+                { user.FirstName } { user.LastName } { user.Email } { user.Hash }
             </li>
         }
         
@@ -63,9 +65,9 @@ templ ListStudents(students []database.ListStudentsRow) {
     <div>
         <h3>Students</h3>
         <ul>
-        for _, item := range students {
+        for _, student := range students {
             <li>
-                { item.FirstName } { item.LastName } { item.Email }
+                { student.FirstName } { student.LastName } { student.Email }
             </li>
         }
         
@@ -79,9 +81,9 @@ templ ListTeachers(teachers []database.ListTeachersRow) {
     <div>
         <h3>Teachers</h3>
         <ul>
-        for _, item := range teachers {
+        for _, teacher := range teachers {
             <li>
-                { item.FirstName } { item.LastName } { item.Email }
+                { teacher.FirstName } { teacher.LastName } { teacher.Email }
             </li>
         }
         
@@ -95,9 +97,9 @@ templ ListParents(parents []database.ListParentsRow) {
     <div>
         <h3>Parents</h3>
         <ul>
-        for _, item := range parents {
+        for _, parent := range parents {
             <li>
-                { item.FirstName } { item.LastName } { item.Email }
+                { parent.FirstName } { parent.LastName } { parent.Email }
             </li>
         }
         
@@ -112,9 +114,9 @@ templ ListAdmins(admins []database.ListAdminsRow) {
     <div>
         <h3>Admins</h3>
         <ul>
-        for _, item := range admins {
+        for _, admin := range admins {
             <li>
-                { item.FirstName } { item.LastName } { item.Email }
+                { admin.FirstName } { admin.LastName } { admin.Email }
             </li>
         }
         
