@@ -18,7 +18,7 @@ type CreateUserParams struct {
 	Tags      []string `json:"tags"`
 }
 
-func TestDecode_SimpleFields(t *testing.T) {
+func TestDecodeFormSimpleFields(t *testing.T) {
 	form := url.Values{}
 	form.Set("first_name", "Alice")
 	form.Set("last_name", "Smith")
@@ -33,7 +33,7 @@ func TestDecode_SimpleFields(t *testing.T) {
 	req.ParseForm()
 
 	var params CreateUserParams
-	err := Decode(req, &params)
+	err := DecodeForm(req, &params)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -48,7 +48,7 @@ func TestDecode_SimpleFields(t *testing.T) {
 	}
 }
 
-func TestDecode_SliceFields(t *testing.T) {
+func TestDecodeFormSliceFields(t *testing.T) {
 	form := url.Values{}
 	form.Add("tags", "go")
 	form.Add("tags", "web")
@@ -63,7 +63,7 @@ func TestDecode_SliceFields(t *testing.T) {
 	req.ParseForm()
 
 	var params CreateUserParams
-	err := Decode(req, &params)
+	err := DecodeForm(req, &params)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestDecode_SliceFields(t *testing.T) {
 	}
 }
 
-func TestDecode_InvalidInt(t *testing.T) {
+func TestDecodeFormInvalidInt(t *testing.T) {
 	form := url.Values{}
 	form.Add("scores", "badvalue")
 
@@ -95,7 +95,7 @@ func TestDecode_InvalidInt(t *testing.T) {
 	req.ParseForm()
 
 	var params CreateUserParams
-	err := Decode(req, &params)
+	err := DecodeForm(req, &params)
 	if err == nil {
 		t.Fatal("expected error for invalid int, got nil")
 	}

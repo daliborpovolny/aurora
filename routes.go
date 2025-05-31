@@ -180,10 +180,10 @@ type registerParams struct {
 	Password  string `json:"password"`
 }
 
-func register(h publicHandler, w http.ResponseWriter, r *http.Request) {
+func apiRegister(h publicHandler, w http.ResponseWriter, r *http.Request) {
 
 	var params registerParams
-	err := Decode(r, &params)
+	err := DecodeJson(r, &params)
 	if err != nil {
 		http.Error(w, "Failed to parse parameters", http.StatusBadRequest)
 		return
@@ -224,5 +224,9 @@ func register(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &cookie)
-	fmt.Fprint(w, "Registered and set cookie")
+
+	json.NewEncoder(w).Encode(JSONResponse{
+		http.StatusCreated,
+		"Registered succesfully",
+	})
 }

@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"net/mail"
 	"reflect"
 	"strconv"
 	"strings"
@@ -81,11 +83,21 @@ import (
 // 	return nil
 // }
 
-func Decode(r *http.Request, dst interface{}) error {
+func DecodeJson(r *http.Request, dst interface{}) error {
+	ct := r.Header.Get("Content-Type")
+
+	if !strings.HasPrefix(ct, "application/json") {
+		return errors.New("expected json request")
+	}
+
+	return json.NewDecoder(r.Body).Decode(dst)
+}
+
+func DecodeForm(r *http.Request, dst interface{}) error {
 	ct := r.Header.Get("Content-Type")
 
 	if strings.HasPrefix(ct, "application/json") {
-		return json.NewDecoder(r.Body).Decode(dst)
+		return errors.New("expected non json request")
 	}
 
 	if err := r.ParseForm(); err != nil {
@@ -153,4 +165,19 @@ func Decode(r *http.Request, dst interface{}) error {
 		}
 	}
 	return nil
+}
+
+func isJson(r *http.Request) bool {
+	cnt := r.Header.Get("Content-Type")
+	return strings.HasPrefix(cnt, "application/json")
+}
+
+type JSONResponse struct {
+	Status  int    `json:"status"`
+	Message string `json:"message"`
+}
+
+func isEmailValid(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }

@@ -9,6 +9,15 @@ type Admin struct {
 	UserID int64 `json:"user_id"`
 }
 
+type Class struct {
+	ID             int64  `json:"id"`
+	TeacherID      int64  `json:"teacher_id"`
+	Room           string `json:"room"`
+	StartYear      int64  `json:"start_year"`
+	GraduationYear int64  `json:"graduation_year"`
+	HasGraduated   int64  `json:"has_graduated"`
+}
+
 type Parent struct {
 	ID     int64 `json:"id"`
 	UserID int64 `json:"user_id"`
@@ -23,8 +32,10 @@ type Session struct {
 }
 
 type Student struct {
-	ID     int64 `json:"id"`
-	UserID int64 `json:"user_id"`
+	ID           int64 `json:"id"`
+	UserID       int64 `json:"user_id"`
+	ClassID      int64 `json:"class_id"`
+	HasGraduated int64 `json:"has_graduated"`
 }
 
 type StudentParent struct {

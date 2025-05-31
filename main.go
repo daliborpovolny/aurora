@@ -80,9 +80,31 @@ func main() {
 			Hash:      "adminsHash",
 		})
 
-		queries.CreateParent(ctx, 1)
-		queries.CreateTeacher(ctx, 2)
-		queries.CreateStudent(ctx, 3)
+		_, err := queries.CreateParent(ctx, 1)
+		if err != nil {
+			panic(err)
+		}
+
+		teacher, err := queries.CreateTeacher(ctx, 2)
+		if err != nil {
+			panic(err)
+		}
+
+		class, err := queries.CreateClass(ctx, database.CreateClassParams{
+			TeacherID:      teacher.ID,
+			Room:           "A24",
+			StartYear:      2024,
+			GraduationYear: 2032,
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		queries.CreateStudent(ctx, database.CreateStudentParams{
+			UserID:  3,
+			ClassID: class.ID,
+		})
+
 		queries.CreateAdmin(ctx, 4)
 
 		queries.AssignStudentToParent(ctx, database.AssignStudentToParentParams{
@@ -100,6 +122,7 @@ func main() {
 	r.GET(apiPrefix+"/teachers", newPublicHandler(getTeachers))
 	r.GET(apiPrefix+"/admins", newPublicHandler(getAdmins))
 	r.GET(apiPrefix+"/parents", newPublicHandler(getParents))
+	r.GET(apiPrefix+"/register", newPublicHandler(apiRegister))
 
 	r.GET("/users", newPublicHandler(viewUsers))
 	r.GET("/students", newPublicHandler(viewStudents))
@@ -107,14 +130,12 @@ func main() {
 	r.GET("/parents", newPublicHandler(viewParents))
 	r.GET("/admins", newPublicHandler(viewAdmins))
 
-	r.GET("/register", newPublicHandler(register))
-
 	s := &http.Server{
 		Handler: r.ServeMux,
 		Addr:    ":" + port,
 	}
 
-	fmt.Println("listing on ", s.Addr)
+	fmt.Println("listening on ", s.Addr)
 
 	err = s.ListenAndServe()
 	if err != nil {
