@@ -7,13 +7,17 @@ import (
 	"time"
 
 	database "aurora/database/gen"
-	templates "aurora/templates"
+	"aurora/templates"
+
+	"aurora/internal/auth"
+	"aurora/internal/handlers"
+	"aurora/internal/utils"
 )
 
 //* html views
 
-func viewUsers(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	users, err := h.q.ListUsers(h.ctx)
+func viewUsers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	users, err := h.Q.ListUsers(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -25,8 +29,8 @@ func viewUsers(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	cmp := templates.ListUsers(users)
 	cmp.Render(r.Context(), w)
 }
-func viewStudents(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	students, err := h.q.ListStudents(h.ctx)
+func viewStudents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	students, err := h.Q.ListStudents(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -38,8 +42,8 @@ func viewStudents(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	cmp.Render(r.Context(), w)
 }
 
-func viewTeachers(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	teachers, err := h.q.ListTeachers(h.ctx)
+func viewTeachers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	teachers, err := h.Q.ListTeachers(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -52,8 +56,8 @@ func viewTeachers(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	cmp.Render(r.Context(), w)
 }
 
-func viewParents(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	parents, err := h.q.ListParents(h.ctx)
+func viewParents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	parents, err := h.Q.ListParents(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -66,8 +70,8 @@ func viewParents(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	cmp.Render(r.Context(), w)
 }
 
-func viewAdmins(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	admins, err := h.q.ListAdmins(h.ctx)
+func viewAdmins(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	admins, err := h.Q.ListAdmins(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -80,20 +84,20 @@ func viewAdmins(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	cmp.Render(r.Context(), w)
 }
 
-func viewRegister(h publicHandler, w http.ResponseWriter, r *http.Request) {
+func viewRegister(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
 	cmp := templates.Register()
 	cmp.Render(r.Context(), w)
 }
 
-func viewLogIn(h publicHandler, w http.ResponseWriter, r *http.Request) {
+func viewLogIn(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
 	cmp := templates.Login()
 	cmp.Render(r.Context(), w)
 }
 
 //* api endpoints
 
-func getUsers(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	users, err := h.q.ListUsers(h.ctx)
+func getUsers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	users, err := h.Q.ListUsers(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -110,8 +114,8 @@ func getUsers(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getStudents(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	students, err := h.q.ListStudents(h.ctx)
+func getStudents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	students, err := h.Q.ListStudents(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -127,8 +131,8 @@ func getStudents(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTeachers(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	teachers, err := h.q.ListTeachers(h.ctx)
+func getTeachers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	teachers, err := h.Q.ListTeachers(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -145,8 +149,8 @@ func getTeachers(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getParents(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	parents, err := h.q.ListParents(h.ctx)
+func getParents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	parents, err := h.Q.ListParents(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -163,8 +167,8 @@ func getParents(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getAdmins(h publicHandler, w http.ResponseWriter, r *http.Request) {
-	admins, err := h.q.ListAdmins(h.ctx)
+func getAdmins(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+	admins, err := h.Q.ListAdmins(h.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -190,10 +194,10 @@ type registerParams struct {
 	Password  string `json:"password"`
 }
 
-func apiRegister(h publicHandler, w http.ResponseWriter, r *http.Request) {
+func apiRegister(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
 
 	var params registerParams
-	err := DecodeJson(r, &params)
+	err := utils.DecodeJson(r, &params)
 	if err != nil {
 		http.Error(w, "Failed to parse parameters", http.StatusBadRequest)
 		return
@@ -204,21 +208,21 @@ func apiRegister(h publicHandler, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash, err := hashPassword(params.Password)
+	hash, err := auth.HashPassword(params.Password)
 	if err != nil {
 		fmt.Println("cannot hash")
 		http.Error(w, "Unhashable password", http.StatusBadRequest)
 		return
 	}
 
-	h.q.CreateUser(h.ctx, database.CreateUserParams{
+	h.Q.CreateUser(h.Ctx, database.CreateUserParams{
 		FirstName: params.FirstName,
 		LastName:  params.LastName,
 		Email:     params.Email,
 		Hash:      hash,
 	})
 
-	value, err := NewSessionCookie()
+	value, err := auth.NewSessionCookie()
 	if err != nil {
 		fmt.Println("cannot generate cookie")
 		http.Error(w, "Server Error", http.StatusInternalServerError)
@@ -229,14 +233,14 @@ func apiRegister(h publicHandler, w http.ResponseWriter, r *http.Request) {
 		Value:    value,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   isDeployed,
+		Secure:   false,
 		Expires:  time.Now().Add(time.Hour * 7 * 24),
 	}
 
 	http.SetCookie(w, &cookie)
 
-	json.NewEncoder(w).Encode(JSONResponse{
-		http.StatusCreated,
-		"Registered succesfully",
+	json.NewEncoder(w).Encode(utils.JSONResponse{
+		Status:  http.StatusCreated,
+		Message: "Registered succesfully",
 	})
 }

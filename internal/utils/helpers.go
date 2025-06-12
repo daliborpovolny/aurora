@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"encoding/json"
@@ -167,7 +167,7 @@ func DecodeForm(r *http.Request, dst interface{}) error {
 	return nil
 }
 
-func isJson(r *http.Request) bool {
+func IsJson(r *http.Request) bool {
 	cnt := r.Header.Get("Content-Type")
 	return strings.HasPrefix(cnt, "application/json")
 }
@@ -177,7 +177,7 @@ type JSONResponse struct {
 	Message string `json:"message"`
 }
 
-func isEmailValid(email string) bool {
+func IsEmailValid(email string) bool {
 	_, err := mail.ParseAddress(email)
 	return err == nil
 }
