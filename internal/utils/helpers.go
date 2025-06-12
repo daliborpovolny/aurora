@@ -177,7 +177,7 @@ type JSONResponse struct {
 	Message string `json:"message"`
 }
 
-func IsEmailValid(email string) bool {
+func ValidateEmail(email string) bool {
 	_, err := mail.ParseAddress(email)
 	return err == nil
 }
