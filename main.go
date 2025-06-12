@@ -130,6 +130,9 @@ func main() {
 	r.GET("/parents", newPublicHandler(viewParents))
 	r.GET("/admins", newPublicHandler(viewAdmins))
 
+	r.GET("/register", newPublicHandler(viewRegister))
+	r.GET("/login", newPublicHandler(viewLogIn))
+
 	s := &http.Server{
 		Handler: r.ServeMux,
 		Addr:    ":" + port,

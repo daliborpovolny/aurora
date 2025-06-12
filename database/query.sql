@@ -243,7 +243,7 @@ WHERE student.class_id = ?;
 
 -- name: CreateClass :one
 INSERT INTO class (
-    teacher_id, room, start_year, graduation_year
+    teacher_id, room, start_year, graduation_year, has_graduated
 ) VALUES (
-    ?, ?, ?, ?
+    ?, ?, ?, ?, 0
 ) RETURNING *;

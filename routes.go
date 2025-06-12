@@ -80,6 +80,16 @@ func viewAdmins(h publicHandler, w http.ResponseWriter, r *http.Request) {
 	cmp.Render(r.Context(), w)
 }
 
+func viewRegister(h publicHandler, w http.ResponseWriter, r *http.Request) {
+	cmp := templates.Register()
+	cmp.Render(r.Context(), w)
+}
+
+func viewLogIn(h publicHandler, w http.ResponseWriter, r *http.Request) {
+	cmp := templates.Login()
+	cmp.Render(r.Context(), w)
+}
+
 //* api endpoints
 
 func getUsers(h publicHandler, w http.ResponseWriter, r *http.Request) {

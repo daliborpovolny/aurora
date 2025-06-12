@@ -44,9 +44,9 @@ func (q *Queries) CreateAdmin(ctx context.Context, userID int64) (Admin, error) 
 
 const createClass = `-- name: CreateClass :one
 INSERT INTO class (
-    teacher_id, room, start_year, graduation_year
+    teacher_id, room, start_year, graduation_year, has_graduated
 ) VALUES (
-    ?, ?, ?, ?
+    ?, ?, ?, ?, 0
 ) RETURNING id, teacher_id, room, start_year, graduation_year, has_graduated
 `
 
