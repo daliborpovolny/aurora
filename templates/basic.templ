@@ -1,51 +1,37 @@
 package templates
 
-import "time"
 
 import database "aurora/database/gen"
 
-templ Header(title string) {
-    <head>
-        <title>{ title }</title>
-        <script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-TODO" crossorigin="anonymous"></script> 
-
-
-        <h2>Aurora</h2>
-        @Navbar()
-    </head>
-}
-
-var year = time.Now().Year()
-
-templ Footer() {
-    <footer>
-        <p>No rights reserved, { year }</p>
-    </footer>
-}
 
 templ Home() {
-    @Header("home")
-    <body>
-        <h1>Welcome to Aurora</h1>
-
-
-    </body>
-    @Footer()
+    @base("home", home())
 }
 
-templ Navbar() {
+templ home() {
     <div>
-        <a href="/users">Users</a>
-        <a href="/students">Students</a>
-        <a href="/teachers">Teachers</a>
-        <a href="/admins">Admins</a>
-        <a href="/register">Register</a>
-        <a href="/login">Log In</a>
+        <h1>Welcome to Aurora</h1>
     </div>
 }
 
+templ Navbar() {
+    <nav>
+        <ul>
+            <li> <a href="/users">Users</a> </li>
+            <li> <a href="/students">Students</a> </li>
+            <li> <a href="/teachers">Teachers</a> </li>
+            <li> <a href="/admins">Admins</a> </li>
+            <li> <a href="/register">Register</a> </li>
+            <li> <a href="/login">Log In</a> </li>
+        </ul>
+    </nav>
+}
+
 templ ListUsers(users []database.User) {
-    @Header("Users")
+    @base("Users", listUsers(users))
+}
+
+templ listUsers(users []database.User) {
     <div>
         <h3>Users</h3>
         <ul>
@@ -57,11 +43,13 @@ templ ListUsers(users []database.User) {
         
         </ul>
     </div>
-    @Footer()
 }
 
 templ ListStudents(students []database.ListStudentsRow) {
-    @Header("Students")
+    @base("Students", listStudents(students))
+}
+
+templ listStudents(students []database.ListStudentsRow) {
     <div>
         <h3>Students</h3>
         <ul>
@@ -73,27 +61,39 @@ templ ListStudents(students []database.ListStudentsRow) {
         
         </ul>
     </div>
-    @Footer()
 }
 
 templ ListTeachers(teachers []database.ListTeachersRow) {
-    @Header("Teachers")
+ @base("Teachers:", listTeachers(teachers))
+}
+
+templ listTeachers(teachers []database.ListTeachersRow) {
     <div>
         <h3>Teachers</h3>
-        <ul>
-        for _, teacher := range teachers {
-            <li>
-                { teacher.FirstName } { teacher.LastName } { teacher.Email }
-            </li>
-        }
+        <table>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+            </tr>
+            
+            for _, teacher := range teachers {
+                <tr>
+                    <td> { teacher.FirstName } </td>
+                    <td> { teacher.LastName } </td>
+                    <td> { teacher.Email } </td>
+                </tr>
+            }
         
-        </ul>
+        </table>
     </div>
-    @Footer()
 }
 
 templ ListParents(parents []database.ListParentsRow) {
-    @Header("Parents")
+    @base("Parents:", listParents(parents))
+}
+
+templ listParents(parents []database.ListParentsRow) {
     <div>
         <h3>Parents</h3>
         <ul>
@@ -105,12 +105,14 @@ templ ListParents(parents []database.ListParentsRow) {
         
         </ul>
     </div>
-    @Footer()
 
 }
 
 templ ListAdmins(admins []database.ListAdminsRow) {
-    @Header("admins")
+    @base("Admins:", listAdmins(admins))
+}
+
+templ listAdmins(admins []database.ListAdminsRow) {
     <div>
         <h3>Admins</h3>
         <ul>
@@ -122,56 +124,52 @@ templ ListAdmins(admins []database.ListAdminsRow) {
         
         </ul>
     </div>
-    @Footer()
 }
 
 templ Register() {
-    @Header("register")
-    <body>
-        <form>
-            <label for="fname">First name:</label><br>
-            <input type="text" id="fname" name="fname"><br>
-            
-            <label for="lname">Last name:</label><br>
-            <input type="text" id="lname" name="lname">     
+    @base("Register:", register())
+}
+
+templ register() {
+    <form>
+        <label for="fname">First name:</label><br>
+        <input type="text" id="fname" name="fname"><br>
         
-            <label for="email">Email:</label><br>
-            <input type="email" id="email" name="email"><br>
+        <label for="lname">Last name:</label><br>
+        <input type="text" id="lname" name="lname">     
+    
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email"><br>
 
-            <label for="pswd">Password:</label><br>
-            <input type="password" id="pswd" name="password"><br>
+        <label for="pswd">Password:</label><br>
+        <input type="password" id="pswd" name="password"><br>
 
-            <button>Register</button>
-        </form>
-    </body>
-    @Footer()
+        <button>Register</button>
+    </form>
 }
 
 templ Login() {
-    @Header("login")
-    <body>
-        <form>
-            <label for="email">Email:</label><br>
-            <input type="email" id="email" name="email"><br>
+    @base("Log In:", login())
+}
 
-            <label for="password">Password:</label><br>
-            <input type="password" name="password" id="password"><br>
+templ login() {
+    <form>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email"><br>
 
-            <button>Log In</button>
-        </form>
-    </body>
-    @Footer()
+        <label for="password">Password:</label><br>
+        <input type="password" name="password" id="password"><br>
+
+        <button>Log In</button>
+    </form>
 }
 
 templ StudentInfo(s database.GetStudentRow) {
-    @Header("student: " + s.FirstName + s.LastName)
+    @base("Student:", studentInfo(s))
+}
 
-    <body>
-        <div>
-            <h2>Student: { s.FirstName + s.LastName }</h2>
-
-
-        </div>
-    
-    </body>
+templ studentInfo(s database.GetStudentRow) {
+    <div>
+        <h2>Student: { s.FirstName + s.LastName }</h2>
+    </div>
 }

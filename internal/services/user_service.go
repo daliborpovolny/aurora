@@ -3,19 +3,20 @@ package services
 import (
 	db "aurora/database"
 	gen "aurora/database/gen"
+
 	"aurora/internal/auth"
 	"aurora/internal/utils"
-	"errors"
-	"time"
 
 	"context"
+	"errors"
 	"net/http"
+	"time"
 )
 
-type UserService struct {
+type UserServiceStruct struct {
 }
 
-func (u UserService) ListUsers(ctx context.Context) ([]gen.User, error) {
+func (u UserServiceStruct) ListUsers(ctx context.Context) ([]gen.User, error) {
 	return db.Queries.ListUsers(ctx)
 }
 
@@ -26,7 +27,7 @@ type RegisterParams struct {
 	Password  string `json:"password"`
 }
 
-func (u UserService) Register(params RegisterParams, ctx context.Context) (*http.Cookie, error) {
+func (u UserServiceStruct) Register(params RegisterParams, ctx context.Context) (*http.Cookie, error) {
 
 	if params.FirstName == "" || params.LastName == "" || params.Email == "" || params.Password == "" {
 		return nil, errors.New("no register parameter can be empty")
@@ -85,20 +86,24 @@ type LoginParams struct {
 	Password string `json:"password"`
 }
 
-func (u UserService) Login(ctx context.Context, params LoginParams) (*http.Cookie, error) {
+func (u UserServiceStruct) Login(params LoginParams, ctx context.Context) (*http.Cookie, error) {
 
 	user, err := db.Queries.GetUserByEmail(ctx, params.Email)
 	if err != nil {
-		return nil, errors.New("invalid email")
+		return nil, &EmailInUseError{params.Email}
+	}
+
+	if len(params.Password) < 6 {
+		return nil, &BadPasswordError{"length must be at least 6"}
 	}
 
 	if !auth.CheckPasswordHash(params.Password, user.Hash) {
-		return nil, errors.New("invalid password")
+		return nil, &BadPasswordError{"unhashable"}
 	}
 
 	cookieValue, err := auth.NewSessionCookie()
 	if err != nil {
-		return nil, errors.New("failed to generate a cookie")
+		return nil, err
 	}
 
 	cookie := http.Cookie{
@@ -118,8 +123,40 @@ func (u UserService) Login(ctx context.Context, params LoginParams) (*http.Cooki
 	})
 
 	if err != nil {
-		return nil, errors.New("failed to create a new session in the database")
+		return nil, err
 	}
 
 	return &cookie, nil
 }
+
+type AuthInfo struct {
+	Session gen.Session
+	User    gen.User
+}
+
+func (u UserServiceStruct) GetAuthInfo(cookie string, ctx context.Context) (AuthInfo, error) {
+
+	authInfo, err := db.Queries.GetUserBySessionCookie(ctx, cookie)
+	if err != nil {
+		return AuthInfo{}, err
+	}
+
+	return AuthInfo{
+		Session: gen.Session{
+			ID:        authInfo.ID,
+			UserID:    authInfo.UserID,
+			Cookie:    cookie,
+			CreatedAt: authInfo.CreatedAt,
+			ExpiresAt: authInfo.ExpiresAt,
+		},
+		User: gen.User{
+			ID:        authInfo.UserID,
+			FirstName: authInfo.FirstName,
+			LastName:  authInfo.LastName,
+			Hash:      authInfo.Hash,
+			Email:     authInfo.Email,
+		},
+	}, nil
+}
+
+var UserService = UserServiceStruct{}

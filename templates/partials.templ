@@ -1,0 +1,42 @@
+package templates
+
+import "time"
+
+templ ErrorBox(message string) {
+    <div>
+        <h2> Error has occurred: </h2>
+        <h3> { message } </h3>
+    </div>
+}
+
+var year = time.Now().Year()
+templ footer() {
+    <footer>
+        <hr>
+        <small>
+            <p>&copy; { year }. All rights reserved.</p>
+        </small>
+    </footer>
+}
+
+templ base(title string, content templ.Component) {
+    <html lang="en">
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/mvp.css"> 
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{ title }</title>
+
+
+        <script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-TODO" crossorigin="anonymous"></script> 
+
+    </head>
+    <body>
+        @Navbar()
+        <main>
+            @content
+        </main>
+        @footer()
+    </body>
+    </html>
+}

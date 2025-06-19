@@ -16,7 +16,7 @@ var Queries *database.Queries
 //go:embed schema.sql
 var ddl string
 
-func Initialize() {
+func Initialize() *sql.DB {
 
 	resetDB := os.Getenv("RESET_DB")
 
@@ -30,7 +30,7 @@ func Initialize() {
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	// defer db.Close()
 
 	// create tables
 	if _, err := db.ExecContext(ctx, ddl); err != nil {
@@ -100,4 +100,5 @@ func Initialize() {
 			StudentID: 1,
 		})
 	}
+	return db
 }

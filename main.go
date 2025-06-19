@@ -27,7 +27,8 @@ func main() {
 	os.Setenv("PORT", "8004")
 	os.Setenv("IS_DEPLOYED", "false")
 
-	db.Initialize()
+	db := db.Initialize()
+	defer db.Close()
 
 	r := internal.NewRouter()
 
@@ -48,6 +49,8 @@ func main() {
 
 	r.GET("/register", handlers.NewPublicHandler(viewRegister))
 	r.GET("/login", handlers.NewPublicHandler(viewLogIn))
+
+	r.GET("/private", handlers.NewPrivateHtmlHandler(privateHome))
 
 	s := &http.Server{
 		Handler: r.ServeMux,

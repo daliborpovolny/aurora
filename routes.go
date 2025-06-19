@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +12,7 @@ import (
 
 	"aurora/internal/auth"
 	"aurora/internal/handlers"
+	"aurora/internal/services"
 	"aurora/internal/utils"
 )
 
@@ -243,4 +245,41 @@ func apiRegister(h handlers.PublicHandler, w http.ResponseWriter, r *http.Reques
 		Status:  http.StatusCreated,
 		Message: "Registered succesfully",
 	})
+}
+
+func privateHome(d handlers.PrivateDeps, w http.ResponseWriter, r *http.Request) *handlers.HtmlError {
+	fmt.Fprint(w, "Email: "+d.User.Email)
+	return nil
+}
+
+func htmlRegister(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) *handlers.HtmlError {
+
+	var params services.RegisterParams
+	err := utils.DecodeForm(r, &params)
+	if err != nil {
+		return &handlers.HtmlError{
+			Message: "Bad form parameters",
+		}
+	}
+
+	cookie, err := services.UserService.Register(params, d.Ctx)
+	if err != nil {
+		if errors.As(err, &services.EmailInUseErr) {
+			return &handlers.HtmlError{
+				Message: "Email is already in use by another account",
+			}
+		} else if errors.As(err, &services.BadPasswordErr) {
+			return &handlers.HtmlError{
+				Message: "Password is invalid because: " + err.Error(),
+			}
+		} else {
+			return &handlers.HtmlError{
+				Message: err.Error(),
+			}
+		}
+	}
+
+	r.AddCookie(cookie)
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	return nil
 }
