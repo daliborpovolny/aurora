@@ -21,3 +21,11 @@ func (e *BadPasswordError) Error() string {
 }
 
 var BadPasswordErr *BadPasswordError
+
+type UnknownEmail struct {
+	Email string
+}
+
+func (e *UnknownEmail) Error() string {
+	return fmt.Sprintf("unknown email: %s", e.Email)
+}

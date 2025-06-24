@@ -3,6 +3,7 @@ package services
 import (
 	db "aurora/database"
 	gen "aurora/database/gen"
+	"database/sql"
 
 	"aurora/internal/auth"
 	"aurora/internal/utils"
@@ -90,7 +91,10 @@ func (u UserServiceStruct) Login(params LoginParams, ctx context.Context) (*http
 
 	user, err := db.Queries.GetUserByEmail(ctx, params.Email)
 	if err != nil {
-		return nil, &EmailInUseError{params.Email}
+		if err == sql.ErrNoRows {
+			return nil, &UnknownEmail{params.Email}
+		}
+		return nil, err
 	}
 
 	if len(params.Password) < 6 {

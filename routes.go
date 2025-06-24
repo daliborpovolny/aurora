@@ -8,93 +8,12 @@ import (
 	"time"
 
 	database "aurora/database/gen"
-	"aurora/templates"
 
 	"aurora/internal/auth"
 	"aurora/internal/handlers"
 	"aurora/internal/services"
 	"aurora/internal/utils"
 )
-
-//* html views
-
-func viewUsers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	users, err := h.Q.ListUsers(h.Ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	if users == nil {
-		users = []database.User{}
-	}
-
-	cmp := templates.ListUsers(users)
-	cmp.Render(r.Context(), w)
-}
-func viewStudents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	students, err := h.Q.ListStudents(h.Ctx)
-	if err != nil {
-		panic(err)
-	}
-	if students == nil {
-		students = []database.ListStudentsRow{}
-	}
-
-	cmp := templates.ListStudents(students)
-	cmp.Render(r.Context(), w)
-}
-
-func viewTeachers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	teachers, err := h.Q.ListTeachers(h.Ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	if teachers == nil {
-		teachers = []database.ListTeachersRow{}
-	}
-
-	cmp := templates.ListTeachers(teachers)
-	cmp.Render(r.Context(), w)
-}
-
-func viewParents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	parents, err := h.Q.ListParents(h.Ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	if parents == nil {
-		parents = []database.ListParentsRow{}
-	}
-
-	cmp := templates.ListParents(parents)
-	cmp.Render(r.Context(), w)
-}
-
-func viewAdmins(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	admins, err := h.Q.ListAdmins(h.Ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	if admins == nil {
-		admins = []database.ListAdminsRow{}
-	}
-
-	cmp := templates.ListAdmins(admins)
-	cmp.Render(r.Context(), w)
-}
-
-func viewRegister(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	cmp := templates.Register()
-	cmp.Render(r.Context(), w)
-}
-
-func viewLogIn(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	cmp := templates.Login()
-	cmp.Render(r.Context(), w)
-}
 
 //* api endpoints
 
