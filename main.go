@@ -11,6 +11,7 @@ import (
 	db "aurora/database"
 	"aurora/internal"
 	"aurora/internal/handlers"
+	"aurora/internal/routes"
 	"aurora/templates"
 )
 
@@ -41,14 +42,14 @@ func main() {
 	r.GET(apiPrefix+"/parents", handlers.NewPublicHandler(getParents))
 	r.GET(apiPrefix+"/register", handlers.NewPublicHandler(apiRegister))
 
-	r.GET("/users", handlers.NewPublicHandler(viewUsers))
-	r.GET("/students", handlers.NewPublicHandler(viewStudents))
-	r.GET("/teachers", handlers.NewPublicHandler(viewTeachers))
-	r.GET("/parents", handlers.NewPublicHandler(viewParents))
-	r.GET("/admins", handlers.NewPublicHandler(viewAdmins))
+	r.GET("/users", handlers.NewPublicHandler(routes.ViewUsers))
+	r.GET("/students", handlers.NewPublicHandler(routes.ViewStudents))
+	r.GET("/teachers", handlers.NewPublicHandler(routes.ViewTeachers))
+	r.GET("/parents", handlers.NewPublicHandler(routes.ViewParents))
+	r.GET("/admins", handlers.NewPublicHandler(routes.ViewAdmins))
 
-	r.GET("/register", handlers.NewPublicHandler(viewRegister))
-	r.GET("/login", handlers.NewPublicHandler(viewLogIn))
+	r.GET("/register", handlers.NewPublicHandler(routes.ViewRegister))
+	r.GET("/login", handlers.NewPublicHandler(routes.ViewLogIn))
 
 	r.GET("/private", handlers.NewPrivateHtmlHandler(privateHome))
 
