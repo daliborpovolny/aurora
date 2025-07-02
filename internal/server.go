@@ -23,18 +23,21 @@ func NewRouter() *Router {
 }
 
 func (r *Router) Handle(method string, pattern string, handler http.Handler) {
-	if _, exists := r.handlers[pattern]; !exists {
+	_, exists := r.handlers[pattern]
+
+	if !exists {
 		r.handlers[pattern] = make(map[string]http.Handler)
+
+		r.ServeMux.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
+			if handler, ok := r.handlers[pattern][req.Method]; ok {
+				handler.ServeHTTP(w, req)
+			} else {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			}
+		})
 	}
 	r.handlers[pattern][method] = handler
 
-	r.ServeMux.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
-		if handler, ok := r.handlers[pattern][req.Method]; ok {
-			handler.ServeHTTP(w, req)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	})
 }
 
 // func (r *Router) ServeHTTP()

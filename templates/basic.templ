@@ -27,123 +27,27 @@ templ Navbar() {
     </nav>
 }
 
-templ ListUsers(users []database.User) {
-    @base("Users", listUsers(users))
-}
-
-templ listUsers(users []database.User) {
-    <div>
-        <h3>Users</h3>
-        <ul>
-        for _, user := range users {
-            <li>
-                { user.FirstName } { user.LastName } { user.Email } { user.Hash }
-            </li>
-        }
-        
-        </ul>
-    </div>
-}
-
-templ ListStudents(students []database.ListStudentsRow) {
-    @base("Students", listStudents(students))
-}
-
-templ listStudents(students []database.ListStudentsRow) {
-    <div>
-        <h3>Students</h3>
-        <ul>
-        for _, student := range students {
-            <li>
-                { student.FirstName } { student.LastName } { student.Email }
-            </li>
-        }
-        
-        </ul>
-    </div>
-}
-
-templ ListTeachers(teachers []database.ListTeachersRow) {
- @base("Teachers:", listTeachers(teachers))
-}
-
-templ listTeachers(teachers []database.ListTeachersRow) {
-    <div>
-        <h3>Teachers</h3>
-        <table>
-            <tr>
-                <th>First name</th>
-                <th>Last name</th>
-                <th>Email</th>
-            </tr>
-            
-            for _, teacher := range teachers {
-                <tr>
-                    <td> { teacher.FirstName } </td>
-                    <td> { teacher.LastName } </td>
-                    <td> { teacher.Email } </td>
-                </tr>
-            }
-        
-        </table>
-    </div>
-}
-
-templ ListParents(parents []database.ListParentsRow) {
-    @base("Parents:", listParents(parents))
-}
-
-templ listParents(parents []database.ListParentsRow) {
-    <div>
-        <h3>Parents</h3>
-        <ul>
-        for _, parent := range parents {
-            <li>
-                { parent.FirstName } { parent.LastName } { parent.Email }
-            </li>
-        }
-        
-        </ul>
-    </div>
-
-}
-
-templ ListAdmins(admins []database.ListAdminsRow) {
-    @base("Admins:", listAdmins(admins))
-}
-
-templ listAdmins(admins []database.ListAdminsRow) {
-    <div>
-        <h3>Admins</h3>
-        <ul>
-        for _, admin := range admins {
-            <li>
-                { admin.FirstName } { admin.LastName } { admin.Email }
-            </li>
-        }
-        
-        </ul>
-    </div>
-}
 
 templ Register() {
     @base("Register:", register())
 }
 
 templ register() {
-    <form>
+    <h2>Register</h2>
+
+    <form method="post">
         <label for="fname">First name:</label><br>
-        <input type="text" id="fname" name="fname"><br>
+        <input type="text" id="fname" name="first_name"><br>
         
         <label for="lname">Last name:</label><br>
-        <input type="text" id="lname" name="lname">     
+        <input type="text" id="lname" name="last_name"><br>   
     
         <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email"><br>
+        <input type="text" id="email" name="email"><br>
 
         <label for="pswd">Password:</label><br>
         <input type="password" id="pswd" name="password"><br>
-
+        <br>
         <button>Register</button>
     </form>
 }
@@ -154,12 +58,14 @@ templ Login() {
 
 templ login() {
     <form>
+        <h2>Log In</h2>
+
         <label for="email">Email:</label><br>
         <input type="email" id="email" name="email"><br>
 
         <label for="password">Password:</label><br>
         <input type="password" name="password" id="password"><br>
-
+        <br>
         <button>Log In</button>
     </form>
 }

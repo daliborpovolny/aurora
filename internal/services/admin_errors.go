@@ -1,26 +1,13 @@
 package services
 
-import (
-	db "aurora/database"
-	gen "aurora/database/gen"
-	"database/sql"
+import "fmt"
 
-	"context"
-)
-
-type AdminServiceStruct struct {
+type UnknownAdminIdError struct {
+	id int64
 }
 
-var AdminService AdminServiceStruct
-
-func (t AdminServiceStruct) ListAdmins(ctx context.Context) ([]gen.ListAdminsRow, error) {
-	return db.Queries.ListAdmins(ctx)
+func (e *UnknownAdminIdError) Error() string {
+	return fmt.Sprintf("unknown admin id: %d", e.id)
 }
 
-func (t AdminServiceStruct) GetAdmin(AdminId int64, ctx context.Context) (gen.GetAdminRow, error) {
-	Admin, err := db.Queries.GetAdmin(ctx, AdminId)
-	if err == sql.ErrNoRows {
-		return gen.GetAdminRow{}, &UnknownAdminIdError{AdminId}
-	}
-	return Admin, nil
-}
+var UnknownAdminIdErr *UnknownAdminIdError

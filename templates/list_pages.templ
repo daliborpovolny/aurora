@@ -1,0 +1,141 @@
+package templates
+
+import "strconv"
+
+import database "aurora/database/gen"
+
+templ ListUsers(users []database.User) {
+    @base("Users", listUsers(users))
+}
+
+templ listUsers(users []database.User) {
+    <div>
+        <h3>Users</h3>
+        <table>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Detail</th>
+            </tr>
+            
+            for _, users := range users {
+                <tr>
+                    <td> { users.FirstName } </td>
+                    <td> { users.LastName } </td>
+                    <td> { users.Email } </td>
+                    <td> <a href="/users" >►</a> </td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+
+templ ListStudents(students []database.ListStudentsRow) {
+    @base("Students", listStudents(students))
+}
+
+templ listStudents(students []database.ListStudentsRow) {
+    <div>
+        <h3>Students</h3>
+        <table>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Detail</th>
+            </tr>
+            
+            for _, student := range students {
+                <tr>    
+                    <td> { student.FirstName } </td>
+                    <td> { student.LastName } </td>
+                    <td> { student.Email } </td>
+                    <td> <a href={ templ.URL("/students/" + strconv.FormatInt(student.StudentID, 10)) }>►</a> </td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+
+templ ListTeachers(teachers []database.ListTeachersRow) {
+    @base("Teachers:", listTeachers(teachers))
+}
+
+templ listTeachers(teachers []database.ListTeachersRow) {
+    <div>
+        <h3>Teachers</h3>
+        <table>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Detail</th>
+            </tr>
+            
+            for _, teacher := range teachers {
+                <tr>
+                    <td> { teacher.FirstName } </td>
+                    <td> { teacher.LastName } </td>
+                    <td> { teacher.Email } </td>
+                    <td> <a href={ templ.URL("/teachers/" + strconv.FormatInt(teacher.TeacherID, 10)) }>►</a> </td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+
+templ ListParents(parents []database.ListParentsRow) {
+    @base("Parents:", listParents(parents))
+}
+
+templ listParents(parents []database.ListParentsRow) {
+    <div>
+        <h3>Parents</h3>
+        <table>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Detail</th>
+            </tr>
+
+            for _, parent := range parents {
+                <tr>
+                    <td> { parent.FirstName } </td>
+                    <td> { parent.LastName } </td>
+                    <td> { parent.Email } </td>
+                    <td> <a href={ templ.URL("/parents/" + strconv.FormatInt(parent.ParentID, 10)) }>►</a> </td>
+                </tr>
+            }
+        </table>
+    </div>
+
+}
+
+templ ListAdmins(admins []database.ListAdminsRow) {
+    @base("Admins:", listAdmins(admins))
+}
+
+templ listAdmins(admins []database.ListAdminsRow) {
+    <div>
+        <h3>Admins</h3>
+        <table>
+            <tr>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Email</th>
+                <th>Detail</th>
+            </tr>
+
+            for _, admin := range admins {
+                <tr>
+                    <td> { admin.FirstName } </td>
+                    <td> { admin.LastName } </td>
+                    <td> { admin.Email } </td>
+                    <td> <a href={ templ.URL("/admins/" + strconv.FormatInt(admin.AdminID, 10)) }>►</a> </td>
+                </tr>
+            }
+        </table>
+    </div>
+}

@@ -10,4 +10,4 @@ func (e *UnknownParentIdError) Error() string {
 	return fmt.Sprintf("unknown Parent id: %d", e.id)
 }
 
-var UnknownParentIdErr UnknownTeacherIdError
+var UnknownParentIdErr *UnknownParentIdError

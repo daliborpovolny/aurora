@@ -44,14 +44,15 @@ func (q *Queries) CreateAdmin(ctx context.Context, userID int64) (Admin, error) 
 
 const createClass = `-- name: CreateClass :one
 INSERT INTO class (
-    teacher_id, room, start_year, graduation_year, has_graduated
+    teacher_id, name, room, start_year, graduation_year, has_graduated
 ) VALUES (
-    ?, ?, ?, ?, 0
-) RETURNING id, teacher_id, room, start_year, graduation_year, has_graduated
+    ?, ?, ?, ?, ?, 0
+) RETURNING id, name, teacher_id, room, start_year, graduation_year, has_graduated
 `
 
 type CreateClassParams struct {
 	TeacherID      int64  `json:"teacher_id"`
+	Name           string `json:"name"`
 	Room           string `json:"room"`
 	StartYear      int64  `json:"start_year"`
 	GraduationYear int64  `json:"graduation_year"`
@@ -60,6 +61,7 @@ type CreateClassParams struct {
 func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Class, error) {
 	row := q.db.QueryRowContext(ctx, createClass,
 		arg.TeacherID,
+		arg.Name,
 		arg.Room,
 		arg.StartYear,
 		arg.GraduationYear,
@@ -67,6 +69,7 @@ func (q *Queries) CreateClass(ctx context.Context, arg CreateClassParams) (Class
 	var i Class
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
 		&i.TeacherID,
 		&i.Room,
 		&i.StartYear,
@@ -237,6 +240,7 @@ const getClass = `-- name: GetClass :one
 
 SELECT
     class.id AS class_id,
+    class.name,
     class.teacher_id,
     class.room,
     class.start_year,
@@ -247,6 +251,7 @@ WHERE class.id = ?
 
 type GetClassRow struct {
 	ClassID        int64  `json:"class_id"`
+	Name           string `json:"name"`
 	TeacherID      int64  `json:"teacher_id"`
 	Room           string `json:"room"`
 	StartYear      int64  `json:"start_year"`
@@ -259,6 +264,7 @@ func (q *Queries) GetClass(ctx context.Context, id int64) (GetClassRow, error) {
 	var i GetClassRow
 	err := row.Scan(
 		&i.ClassID,
+		&i.Name,
 		&i.TeacherID,
 		&i.Room,
 		&i.StartYear,
@@ -552,6 +558,28 @@ func (q *Queries) GetUserBySessionCookie(ctx context.Context, cookie string) (Ge
 	return i, err
 }
 
+const getUserType = `-- name: GetUserType :one
+SELECT
+  CASE
+    WHEN EXISTS (SELECT 1 FROM teacher WHERE user_id = user.id) THEN 'teacher'
+    WHEN EXISTS (SELECT 1 FROM admin WHERE user_id = user.id) THEN 'admin'
+    WHEN EXISTS (SELECT 1 FROM student WHERE user_id = user.id) THEN 'student'
+    WHEN EXISTS (SELECT 1 FROM parent WHERE user_id = user.id) THEN 'parent'
+    ELSE 'unknown'
+  END AS role
+FROM
+  "user"
+WHERE
+  user.id = ?
+`
+
+func (q *Queries) GetUserType(ctx context.Context, id int64) (string, error) {
+	row := q.db.QueryRowContext(ctx, getUserType, id)
+	var role string
+	err := row.Scan(&role)
+	return role, err
+}
+
 const graduateClass = `-- name: GraduateClass :exec
 
 UPDATE class
@@ -581,7 +609,7 @@ func (q *Queries) GraduateStudentOfClass(ctx context.Context, classID int64) err
 
 const listAdmins = `-- name: ListAdmins :many
 SELECT
-    admin.id,
+    admin.id AS admin_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -591,7 +619,7 @@ JOIN user on admin.user_id = user.id
 `
 
 type ListAdminsRow struct {
-	ID        int64  `json:"id"`
+	AdminID   int64  `json:"admin_id"`
 	UserID    int64  `json:"user_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -608,7 +636,7 @@ func (q *Queries) ListAdmins(ctx context.Context) ([]ListAdminsRow, error) {
 	for rows.Next() {
 		var i ListAdminsRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.AdminID,
 			&i.UserID,
 			&i.FirstName,
 			&i.LastName,
@@ -630,6 +658,7 @@ func (q *Queries) ListAdmins(ctx context.Context) ([]ListAdminsRow, error) {
 const listClasses = `-- name: ListClasses :many
 SELECT
     class.id AS class_id,
+    class.name,
     class.teacher_id,
     class.room,
     class.start_year,
@@ -640,6 +669,7 @@ WHERE class.has_graduated = 0
 
 type ListClassesRow struct {
 	ClassID        int64  `json:"class_id"`
+	Name           string `json:"name"`
 	TeacherID      int64  `json:"teacher_id"`
 	Room           string `json:"room"`
 	StartYear      int64  `json:"start_year"`
@@ -657,6 +687,7 @@ func (q *Queries) ListClasses(ctx context.Context) ([]ListClassesRow, error) {
 		var i ListClassesRow
 		if err := rows.Scan(
 			&i.ClassID,
+			&i.Name,
 			&i.TeacherID,
 			&i.Room,
 			&i.StartYear,
@@ -677,7 +708,7 @@ func (q *Queries) ListClasses(ctx context.Context) ([]ListClassesRow, error) {
 
 const listParents = `-- name: ListParents :many
 SELECT
-    parent.id,
+    parent.id AS parent_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -687,7 +718,7 @@ JOIN user on parent.user_id = user.id
 `
 
 type ListParentsRow struct {
-	ID        int64  `json:"id"`
+	ParentID  int64  `json:"parent_id"`
 	UserID    int64  `json:"user_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -704,7 +735,7 @@ func (q *Queries) ListParents(ctx context.Context) ([]ListParentsRow, error) {
 	for rows.Next() {
 		var i ListParentsRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.ParentID,
 			&i.UserID,
 			&i.FirstName,
 			&i.LastName,
@@ -725,7 +756,7 @@ func (q *Queries) ListParents(ctx context.Context) ([]ListParentsRow, error) {
 
 const listStudents = `-- name: ListStudents :many
 SELECT 
-    student.id,
+    student.id AS student_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -736,7 +767,7 @@ WHERE student.has_graduated = 0
 `
 
 type ListStudentsRow struct {
-	ID        int64  `json:"id"`
+	StudentID int64  `json:"student_id"`
 	UserID    int64  `json:"user_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -753,7 +784,7 @@ func (q *Queries) ListStudents(ctx context.Context) ([]ListStudentsRow, error) {
 	for rows.Next() {
 		var i ListStudentsRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.StudentID,
 			&i.UserID,
 			&i.FirstName,
 			&i.LastName,
@@ -774,7 +805,7 @@ func (q *Queries) ListStudents(ctx context.Context) ([]ListStudentsRow, error) {
 
 const listStudentsOfClass = `-- name: ListStudentsOfClass :many
 SELECT 
-    student.id,
+    student.id AS student_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -785,7 +816,7 @@ WHERE student.class_id = ?
 `
 
 type ListStudentsOfClassRow struct {
-	ID        int64  `json:"id"`
+	StudentID int64  `json:"student_id"`
 	UserID    int64  `json:"user_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -802,7 +833,7 @@ func (q *Queries) ListStudentsOfClass(ctx context.Context, classID int64) ([]Lis
 	for rows.Next() {
 		var i ListStudentsOfClassRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.StudentID,
 			&i.UserID,
 			&i.FirstName,
 			&i.LastName,
@@ -823,7 +854,7 @@ func (q *Queries) ListStudentsOfClass(ctx context.Context, classID int64) ([]Lis
 
 const listTeachers = `-- name: ListTeachers :many
 SELECT
-    teacher.id,
+    teacher.id AS teacher_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -833,7 +864,7 @@ JOIN user ON teacher.user_id = user.id
 `
 
 type ListTeachersRow struct {
-	ID        int64  `json:"id"`
+	TeacherID int64  `json:"teacher_id"`
 	UserID    int64  `json:"user_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -850,7 +881,7 @@ func (q *Queries) ListTeachers(ctx context.Context) ([]ListTeachersRow, error) {
 	for rows.Next() {
 		var i ListTeachersRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.TeacherID,
 			&i.UserID,
 			&i.FirstName,
 			&i.LastName,

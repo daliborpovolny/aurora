@@ -22,6 +22,7 @@ func Initialize() *sql.DB {
 
 	if resetDB == "true" {
 		os.Remove("./database/db_file.db")
+		Seed()
 	}
 
 	ctx := context.Background()
@@ -39,6 +40,11 @@ func Initialize() *sql.DB {
 
 	Queries = database.New(db)
 
+	return db
+}
+
+func Seed() {
+	ctx := context.Background()
 	if users, _ := Queries.ListUsers(ctx); len(users) == 0 {
 		Queries.CreateUser(ctx, database.CreateUserParams{
 			FirstName: "par",
@@ -100,5 +106,4 @@ func Initialize() *sql.DB {
 			StudentID: 1,
 		})
 	}
-	return db
 }

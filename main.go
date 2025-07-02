@@ -18,13 +18,17 @@ import (
 var apiPrefix string = "/api/v1"
 
 func home(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.Error(w, "Unknown page", http.StatusNotFound)
+		return
+	}
 	cmp := templates.Home()
 	cmp.Render(r.Context(), w)
 }
 
 func main() {
 
-	os.Setenv("RESET_DB", "true")
+	os.Setenv("RESET_DB", "false")
 	os.Setenv("PORT", "8004")
 	os.Setenv("IS_DEPLOYED", "false")
 
@@ -49,6 +53,8 @@ func main() {
 	r.GET("/admins", handlers.NewPublicHandler(routes.ViewAdmins))
 
 	r.GET("/register", handlers.NewPublicHandler(routes.ViewRegister))
+	r.POST("/register", handlers.NewPublicHtmlHandler(routes.Register))
+
 	r.GET("/login", handlers.NewPublicHandler(routes.ViewLogIn))
 
 	r.GET("/private", handlers.NewPrivateHtmlHandler(privateHome))
@@ -57,6 +63,8 @@ func main() {
 		Handler: r.ServeMux,
 		Addr:    ":" + os.Getenv("PORT"),
 	}
+
+	r.ServeMux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	fmt.Println("listening on ", s.Addr)
 

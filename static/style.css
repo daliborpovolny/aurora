@@ -1,0 +1,52 @@
+:root {
+    font-family: serif;
+    font-size: 18px;
+    line-height: 1.6;
+    background: #f9f9f9;
+    color: #222;
+    max-width: 60ch;
+    margin: auto;
+    padding: 2rem;
+}
+
+body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+a {
+    color: #005577;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1, h2, h3 {
+    font-weight: bold;
+    margin-top: 2rem;
+}
+
+nav li {
+    display: inline;
+}
+
+nav ul {
+
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 1rem;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #222;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}

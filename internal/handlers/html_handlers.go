@@ -15,7 +15,7 @@ type HtmlError struct {
 
 type PublicHtmlHandler func(d PublicDeps, w http.ResponseWriter, r *http.Request) *HtmlError
 
-func NewPublicHtmlHandler(f PublicHtmlHandler) http.HandlerFunc {
+func NewPublicHtmlHandler(f PublicHtmlHandler) internal.CustomHandler {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		d := PublicDeps{

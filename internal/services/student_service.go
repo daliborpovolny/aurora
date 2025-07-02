@@ -19,8 +19,11 @@ func (t StudentServiceStruct) ListStudents(ctx context.Context) ([]gen.ListStude
 
 func (t StudentServiceStruct) GetStudent(StudentId int64, ctx context.Context) (gen.GetStudentRow, error) {
 	Student, err := db.Queries.GetStudent(ctx, StudentId)
-	if err == sql.ErrNoRows {
-		return gen.GetStudentRow{}, &UnknownStudentIdError{StudentId}
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return gen.GetStudentRow{}, &UnknownStudentIdError{StudentId}
+		}
+		return gen.GetStudentRow{}, err
 	}
 	return Student, nil
 }

@@ -37,10 +37,11 @@ func NewPublicHandler(f func(
 }
 
 type PrivateDeps struct {
-	Q       *gen.Queries
-	Ctx     context.Context
-	User    gen.User
-	Session gen.Session
+	Q        *gen.Queries
+	Ctx      context.Context
+	User     gen.User
+	Session  gen.Session
+	UserType string
 }
 
 type PrivateHandler func(d PrivateDeps, w http.ResponseWriter, r *http.Request)

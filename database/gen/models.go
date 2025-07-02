@@ -11,6 +11,7 @@ type Admin struct {
 
 type Class struct {
 	ID             int64  `json:"id"`
+	Name           string `json:"name"`
 	TeacherID      int64  `json:"teacher_id"`
 	Room           string `json:"room"`
 	StartYear      int64  `json:"start_year"`

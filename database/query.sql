@@ -20,6 +20,19 @@ INSERT INTO user (
 )
 RETURNING *;
 
+-- name: GetUserType :one
+SELECT
+  CASE
+    WHEN EXISTS (SELECT 1 FROM teacher WHERE user_id = user.id) THEN 'teacher'
+    WHEN EXISTS (SELECT 1 FROM admin WHERE user_id = user.id) THEN 'admin'
+    WHEN EXISTS (SELECT 1 FROM student WHERE user_id = user.id) THEN 'student'
+    WHEN EXISTS (SELECT 1 FROM parent WHERE user_id = user.id) THEN 'parent'
+    ELSE 'unknown'
+  END AS role
+FROM
+  "user"
+WHERE
+  user.id = ?;
 
 --* Session
 
@@ -64,7 +77,7 @@ WHERE student_parent.student_id = ?;
 
 -- name: ListStudents :many
 SELECT 
-    student.id,
+    student.id AS student_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -111,7 +124,7 @@ WHERE teacher.id = ?;
 
 -- name: ListTeachers :many
 SELECT
-    teacher.id,
+    teacher.id AS teacher_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -142,7 +155,7 @@ WHERE parent.id = ?;
 
 -- name: ListParents :many
 SELECT
-    parent.id,
+    parent.id AS parent_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -192,7 +205,7 @@ WHERE admin.id = ?;
 
 -- name: ListAdmins :many
 SELECT
-    admin.id,
+    admin.id AS admin_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -213,6 +226,7 @@ INSERT INTO admin (
 -- name: GetClass :one
 SELECT
     class.id AS class_id,
+    class.name,
     class.teacher_id,
     class.room,
     class.start_year,
@@ -223,6 +237,7 @@ WHERE class.id = ?;
 -- name: ListClasses :many
 SELECT
     class.id AS class_id,
+    class.name,
     class.teacher_id,
     class.room,
     class.start_year,
@@ -232,7 +247,7 @@ WHERE class.has_graduated = 0;
 
 -- name: ListStudentsOfClass :many
 SELECT 
-    student.id,
+    student.id AS student_id,
     user.id AS user_id,
     user.first_name,
     user.last_name,
@@ -243,7 +258,7 @@ WHERE student.class_id = ?;
 
 -- name: CreateClass :one
 INSERT INTO class (
-    teacher_id, room, start_year, graduation_year, has_graduated
+    teacher_id, name, room, start_year, graduation_year, has_graduated
 ) VALUES (
-    ?, ?, ?, ?, 0
+    ?, ?, ?, ?, ?, 0
 ) RETURNING *;

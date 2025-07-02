@@ -1,0 +1,21 @@
+package templates
+
+import "aurora/database/gen"
+
+templ StudentDetail(student database.GetStudentRow, class database.GetClassRow, classTeacher database.GetTeacherRow) {
+    <div>
+        <h3>Student</h3>
+
+        <table>
+            <td>First name: { student.FirstName }</td>
+            <td>Last name: { student.LastName }</td>
+            <td>Email: { student.Email }</td>
+
+            <br>
+            <td> <a href="/classes/{ class.ClassID}"> Class: { class.Name } </a> </td>
+            <td>Classroom: { class.Room }</td>
+            <td> <a href="/teacher/{ classTeacher.TeacherID }">Class teacher: { classTeacher.FirstName + classTeacher.LastName }</a></td>
+        
+        </table>
+    </div>
+}

@@ -134,8 +134,9 @@ func (u UserServiceStruct) Login(params LoginParams, ctx context.Context) (*http
 }
 
 type AuthInfo struct {
-	Session gen.Session
-	User    gen.User
+	Session  gen.Session
+	User     gen.User
+	UserType string
 }
 
 func (u UserServiceStruct) GetAuthInfo(cookie string, ctx context.Context) (AuthInfo, error) {
@@ -144,6 +145,8 @@ func (u UserServiceStruct) GetAuthInfo(cookie string, ctx context.Context) (Auth
 	if err != nil {
 		return AuthInfo{}, err
 	}
+
+	userType, err := db.Queries.GetUserType(ctx, authInfo.UserID)
 
 	return AuthInfo{
 		Session: gen.Session{
@@ -160,6 +163,7 @@ func (u UserServiceStruct) GetAuthInfo(cookie string, ctx context.Context) (Auth
 			Hash:      authInfo.Hash,
 			Email:     authInfo.Email,
 		},
+		UserType: userType,
 	}, nil
 }
 
