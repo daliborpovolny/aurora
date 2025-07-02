@@ -14,6 +14,15 @@ import (
 	"time"
 )
 
+type UserServicer interface {
+	ListUsers(ctx context.Context) ([]gen.User, error)
+	Register(params RegisterParams, ctx context.Context) (*http.Cookie, error)
+	Login(params LoginParams, ctx context.Context) (*http.Cookie, error)
+	GetAuthInfo(cookie string, ctx context.Context) (AuthInfo, error)
+}
+
+var UserService UserServicer = UserServiceStruct{}
+
 type UserServiceStruct struct {
 }
 
@@ -166,5 +175,3 @@ func (u UserServiceStruct) GetAuthInfo(cookie string, ctx context.Context) (Auth
 		UserType: userType,
 	}, nil
 }
-
-var UserService = UserServiceStruct{}

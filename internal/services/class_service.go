@@ -8,19 +8,24 @@ import (
 	"context"
 )
 
+type ClassServicer interface {
+	ListClasses(ctx context.Context) ([]gen.ListClassesRow, error)
+	GetClass(classId int64, ctx context.Context) (gen.GetClassRow, error)
+}
+
+var ClassService ClassServicer = ClassServiceStruct{}
+
 type ClassServiceStruct struct {
 }
 
-var ClassService ClassServiceStruct
-
-func (t ClassServiceStruct) ListClasss(ctx context.Context) ([]gen.ListClassesRow, error) {
+func (t ClassServiceStruct) ListClasses(ctx context.Context) ([]gen.ListClassesRow, error) {
 	return db.Queries.ListClasses(ctx)
 }
 
-func (t ClassServiceStruct) GetClass(ClassId int64, ctx context.Context) (gen.GetClassRow, error) {
-	class, err := db.Queries.GetClass(ctx, ClassId)
+func (t ClassServiceStruct) GetClass(classId int64, ctx context.Context) (gen.GetClassRow, error) {
+	class, err := db.Queries.GetClass(ctx, classId)
 	if err == sql.ErrNoRows {
-		return gen.GetClassRow{}, &UnknownClassIdError{ClassId}
+		return gen.GetClassRow{}, UnknownClassIdError{classId}
 	}
 	return class, nil
 }

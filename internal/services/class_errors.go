@@ -6,8 +6,8 @@ type UnknownClassIdError struct {
 	id int64
 }
 
-func (e *UnknownClassIdError) Error() string {
+func (e UnknownClassIdError) Error() string {
 	return fmt.Sprintf("unknown class id: %d", e.id)
 }
 
-var UnknownClassIdErr *UnknownAdminIdError
+var UnknownClassIdErr error = &UnknownClassIdError{}

@@ -8,19 +8,24 @@ import (
 	"context"
 )
 
-type AdminServiceStruct struct {
+type AdminServicer interface {
+	ListAdmins(ctx context.Context) ([]gen.ListAdminsRow, error)
+	GetAdmin(adminId int64, ctx context.Context) (gen.GetAdminRow, error)
 }
 
-var AdminService AdminServiceStruct
+var AdminService AdminServicer = AdminServiceStruct{}
+
+type AdminServiceStruct struct {
+}
 
 func (t AdminServiceStruct) ListAdmins(ctx context.Context) ([]gen.ListAdminsRow, error) {
 	return db.Queries.ListAdmins(ctx)
 }
 
-func (t AdminServiceStruct) GetAdmin(AdminId int64, ctx context.Context) (gen.GetAdminRow, error) {
-	Admin, err := db.Queries.GetAdmin(ctx, AdminId)
+func (t AdminServiceStruct) GetAdmin(adminId int64, ctx context.Context) (gen.GetAdminRow, error) {
+	admin, err := db.Queries.GetAdmin(ctx, adminId)
 	if err == sql.ErrNoRows {
-		return gen.GetAdminRow{}, &UnknownAdminIdError{AdminId}
+		return gen.GetAdminRow{}, UnknownAdminIdError{adminId}
 	}
-	return Admin, nil
+	return admin, nil
 }

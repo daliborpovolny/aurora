@@ -8,10 +8,15 @@ import (
 	"context"
 )
 
-type TeacherServiceStruct struct {
+type TeacherServicer interface {
+	ListTeachers(ctx context.Context) ([]gen.ListTeachersRow, error)
+	GetTeacher(teacherId int64, ctx context.Context) (gen.GetTeacherRow, error)
 }
 
-var TeacherService TeacherServiceStruct
+var TeacherService TeacherServicer = TeacherServiceStruct{}
+
+type TeacherServiceStruct struct {
+}
 
 func (t TeacherServiceStruct) ListTeachers(ctx context.Context) ([]gen.ListTeachersRow, error) {
 	return db.Queries.ListTeachers(ctx)
@@ -20,7 +25,7 @@ func (t TeacherServiceStruct) ListTeachers(ctx context.Context) ([]gen.ListTeach
 func (t TeacherServiceStruct) GetTeacher(teacherId int64, ctx context.Context) (gen.GetTeacherRow, error) {
 	teacher, err := db.Queries.GetTeacher(ctx, teacherId)
 	if err == sql.ErrNoRows {
-		return gen.GetTeacherRow{}, &UnknownTeacherIdError{teacherId}
+		return gen.GetTeacherRow{}, UnknownTeacherIdError{teacherId}
 	}
 	return teacher, nil
 }

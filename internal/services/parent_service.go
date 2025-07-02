@@ -8,19 +8,24 @@ import (
 	"context"
 )
 
-type ParentServiceStruct struct {
+type ParentServicer interface {
+	ListParents(ctx context.Context) ([]gen.ListParentsRow, error)
+	GetParent(parentId int64, ctx context.Context) (gen.GetParentRow, error)
 }
 
-var ParentService ParentServiceStruct
+var ParentService ParentServicer = ParentServiceStruct{}
+
+type ParentServiceStruct struct {
+}
 
 func (t ParentServiceStruct) ListParents(ctx context.Context) ([]gen.ListParentsRow, error) {
 	return db.Queries.ListParents(ctx)
 }
 
-func (t ParentServiceStruct) GetParent(ParentId int64, ctx context.Context) (gen.GetParentRow, error) {
-	Parent, err := db.Queries.GetParent(ctx, ParentId)
+func (t ParentServiceStruct) GetParent(parentId int64, ctx context.Context) (gen.GetParentRow, error) {
+	parent, err := db.Queries.GetParent(ctx, parentId)
 	if err == sql.ErrNoRows {
-		return gen.GetParentRow{}, &UnknownParentIdError{ParentId}
+		return gen.GetParentRow{}, UnknownParentIdError{parentId}
 	}
-	return Parent, nil
+	return parent, nil
 }

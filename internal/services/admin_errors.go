@@ -6,8 +6,8 @@ type UnknownAdminIdError struct {
 	id int64
 }
 
-func (e *UnknownAdminIdError) Error() string {
+func (e UnknownAdminIdError) Error() string {
 	return fmt.Sprintf("unknown admin id: %d", e.id)
 }
 
-var UnknownAdminIdErr *UnknownAdminIdError
+var UnknownAdminIdErr error = &UnknownAdminIdError{}
