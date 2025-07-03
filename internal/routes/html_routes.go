@@ -2,18 +2,20 @@ package routes
 
 import (
 	database "aurora/database/gen"
+	"aurora/internal/auth"
 	"aurora/internal/handlers"
 	"aurora/internal/services"
 	"aurora/internal/utils"
 	"aurora/templates"
 	"errors"
+	"fmt"
 	"net/http"
 )
 
 //* html views
 
-func ViewUsers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	users, err := services.UserService.ListUsers(h.Ctx)
+func ViewUsers(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) {
+	users, err := services.UserService.ListUsers(d.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -22,12 +24,12 @@ func ViewUsers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request)
 		users = []database.User{}
 	}
 
-	cmp := templates.ListUsers(users)
-	cmp.Render(r.Context(), w)
+	cmp := templates.ListUsers(users, d.A)
+	cmp.Render(d.Ctx, w)
 }
 
-func ViewStudents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	students, err := services.StudentService.ListStudents(h.Ctx)
+func ViewStudents(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) {
+	students, err := services.StudentService.ListStudents(d.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -35,12 +37,12 @@ func ViewStudents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Reque
 		students = []database.ListStudentsRow{}
 	}
 
-	cmp := templates.ListStudents(students)
-	cmp.Render(r.Context(), w)
+	cmp := templates.ListStudents(students, d.A)
+	cmp.Render(d.Ctx, w)
 }
 
-func ViewTeachers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	teachers, err := services.TeacherService.ListTeachers(h.Ctx)
+func ViewTeachers(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) {
+	teachers, err := services.TeacherService.ListTeachers(d.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -49,12 +51,12 @@ func ViewTeachers(h handlers.PublicHandler, w http.ResponseWriter, r *http.Reque
 		teachers = []database.ListTeachersRow{}
 	}
 
-	cmp := templates.ListTeachers(teachers)
-	cmp.Render(r.Context(), w)
+	cmp := templates.ListTeachers(teachers, d.A)
+	cmp.Render(d.Ctx, w)
 }
 
-func ViewParents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	parents, err := services.ParentService.ListParents(h.Ctx)
+func ViewParents(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) {
+	parents, err := services.ParentService.ListParents(d.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -63,12 +65,12 @@ func ViewParents(h handlers.PublicHandler, w http.ResponseWriter, r *http.Reques
 		parents = []database.ListParentsRow{}
 	}
 
-	cmp := templates.ListParents(parents)
-	cmp.Render(r.Context(), w)
+	cmp := templates.ListParents(parents, d.A)
+	cmp.Render(d.Ctx, w)
 }
 
-func ViewAdmins(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
-	admins, err := services.AdminService.ListAdmins(h.Ctx)
+func ViewAdmins(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) {
+	admins, err := services.AdminService.ListAdmins(d.Ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -77,75 +79,96 @@ func ViewAdmins(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request
 		admins = []database.ListAdminsRow{}
 	}
 
-	cmp := templates.ListAdmins(admins)
-	cmp.Render(r.Context(), w)
+	cmp := templates.ListAdmins(admins, d.A)
+	cmp.Render(d.Ctx, w)
 }
 
-func ViewRegister(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+func ViewRegister(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) {
 	cmp := templates.Register()
-	cmp.Render(r.Context(), w)
+	cmp.Render(d.Ctx, w)
 }
 
-func ViewLogIn(h handlers.PublicHandler, w http.ResponseWriter, r *http.Request) {
+func ViewLogIn(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) {
 	cmp := templates.Login()
-	cmp.Render(r.Context(), w)
+	cmp.Render(d.Ctx, w)
 }
 
-func ViewStudentDetail(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) *handlers.HtmlError {
+func ViewStudentDetail(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) error {
 	student, err := services.StudentService.GetStudent(5, d.Ctx)
 	if err != nil {
-		return &handlers.HtmlError{
-			Message: err.Error(),
-		}
+		return err
 	}
 
 	class, err := services.ClassService.GetClass(student.ClassID, d.Ctx)
 	if err != nil {
-		return &handlers.HtmlError{
-			Message: err.Error(),
-		}
+		return err
 	}
 
 	teacher, err := services.TeacherService.GetTeacher(class.TeacherID, d.Ctx)
 	if err != nil {
-		return &handlers.HtmlError{
-			Message: err.Error(),
-		}
+		return err
 	}
 
-	templates.StudentDetail(student, class, teacher).Render(d.Ctx, w)
+	templates.StudentDetail(student, class, teacher, d.A).Render(d.Ctx, w)
 	return nil
 }
 
-func Register(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) *handlers.HtmlError {
-
-	var params services.RegisterParams
+func Register(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) error {
+	var params auth.RegisterParams
 	err := utils.DecodeForm(r, &params)
 	if err != nil {
-		return &handlers.HtmlError{
-			Message: "Bad form parameters",
-		}
+		return errors.New("unexpected form params")
 	}
 
-	cookie, err := services.UserService.Register(params, d.Ctx)
+	cookie, err := auth.AuthService.Register(params, d.Ctx)
 	if err != nil {
-		if errors.As(err, &services.EmailInUseErr) {
-			return &handlers.HtmlError{
-				Message: "Email is already in use by another account",
-			}
-		} else if errors.As(err, &services.BadPasswordErr) {
-			return &handlers.HtmlError{
-				Message: "Password is invalid because: " + err.Error(),
-			}
+		if errors.As(err, &auth.EmailInUseError{}) {
+			fmt.Println("Email in use")
+			return err
+		} else if errors.As(err, &auth.BadPasswordError{}) {
+			fmt.Println("Bad password")
+			return err
 		} else {
-			return &handlers.HtmlError{
-				Message: err.Error(),
-			}
+			fmt.Println(err.Error())
+			return err
 		}
 	}
 
-	r.AddCookie(cookie)
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	http.SetCookie(w, cookie)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 	return nil
+}
 
+func LogIn(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) error {
+
+	var params auth.LoginParams
+	err := utils.DecodeForm(r, &params)
+	if err != nil {
+		return errors.New("unexpected form params")
+	}
+
+	cookie, err := auth.AuthService.Login(params, d.Ctx)
+	if err != nil {
+		return err
+	}
+
+	http.SetCookie(w, cookie)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+	return nil
+}
+
+func Home(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) error {
+	if r.URL.Path != "/" {
+		return errors.New("unknown page")
+	}
+
+	cmp := templates.Home(d.A)
+	cmp.Render(d.Ctx, w)
+	return nil
+}
+
+func Count(d handlers.PublicDeps, w http.ResponseWriter, r *http.Request) error {
+	fmt.Println(r.PathValue("id"))
+	fmt.Fprint(w, "mmmmm :DD")
+	return nil
 }

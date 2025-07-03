@@ -12,19 +12,9 @@ import (
 	"aurora/internal"
 	"aurora/internal/handlers"
 	"aurora/internal/routes"
-	"aurora/templates"
 )
 
 var apiPrefix string = "/api/v1"
-
-func home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.Error(w, "Unknown page", http.StatusNotFound)
-		return
-	}
-	cmp := templates.Home()
-	cmp.Render(r.Context(), w)
-}
 
 func main() {
 
@@ -37,14 +27,15 @@ func main() {
 
 	r := internal.NewRouter()
 
-	r.GET("/", home)
+	//TODO fix api, refactor to use json handler with jsonError
+	// r.GET(apiPrefix+"/users", handlers.NewPublicHandler(getUsers))
+	// r.GET(apiPrefix+"/students", handlers.NewPublicHandler(getStudents))
+	// r.GET(apiPrefix+"/teachers", handlers.NewPublicHandler(getTeachers))
+	// r.GET(apiPrefix+"/admins", handlers.NewPublicHandler(getAdmins))
+	// r.GET(apiPrefix+"/parents", handlers.NewPublicHandler(getParents))
+	// r.GET(apiPrefix+"/register", handlers.NewPublicHandler(apiRegister))
 
-	r.GET(apiPrefix+"/users", handlers.NewPublicHandler(getUsers))
-	r.GET(apiPrefix+"/students", handlers.NewPublicHandler(getStudents))
-	r.GET(apiPrefix+"/teachers", handlers.NewPublicHandler(getTeachers))
-	r.GET(apiPrefix+"/admins", handlers.NewPublicHandler(getAdmins))
-	r.GET(apiPrefix+"/parents", handlers.NewPublicHandler(getParents))
-	r.GET(apiPrefix+"/register", handlers.NewPublicHandler(apiRegister))
+	r.GET("/", handlers.NewPublicHtmlHandler(routes.Home))
 
 	r.GET("/users", handlers.NewPublicHandler(routes.ViewUsers))
 	r.GET("/students", handlers.NewPublicHandler(routes.ViewStudents))
@@ -56,8 +47,11 @@ func main() {
 	r.POST("/register", handlers.NewPublicHtmlHandler(routes.Register))
 
 	r.GET("/login", handlers.NewPublicHandler(routes.ViewLogIn))
+	r.POST("/login", handlers.NewPublicHtmlHandler(routes.LogIn))
 
-	r.GET("/private", handlers.NewPrivateHtmlHandler(privateHome))
+	r.GET("/count/{id}", handlers.NewPublicHtmlHandler(routes.Count))
+
+	// r.GET("/private", handlers.NewPrivateHtmlHandler(privateHome))
 
 	s := &http.Server{
 		Handler: r.ServeMux,
