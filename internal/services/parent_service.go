@@ -25,7 +25,7 @@ func (t ParentServiceStruct) ListParents(ctx context.Context) ([]gen.ListParents
 func (t ParentServiceStruct) GetParent(parentId int64, ctx context.Context) (gen.GetParentRow, error) {
 	parent, err := db.Queries.GetParent(ctx, parentId)
 	if err == sql.ErrNoRows {
-		return gen.GetParentRow{}, UnknownParentIdError{parentId}
+		return gen.GetParentRow{}, &UnknownParentIdError{parentId}
 	}
 	return parent, nil
 }

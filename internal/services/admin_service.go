@@ -25,7 +25,7 @@ func (t AdminServiceStruct) ListAdmins(ctx context.Context) ([]gen.ListAdminsRow
 func (t AdminServiceStruct) GetAdmin(adminId int64, ctx context.Context) (gen.GetAdminRow, error) {
 	admin, err := db.Queries.GetAdmin(ctx, adminId)
 	if err == sql.ErrNoRows {
-		return gen.GetAdminRow{}, UnknownAdminIdError{adminId}
+		return gen.GetAdminRow{}, &UnknownAdminIdError{adminId}
 	}
 	return admin, nil
 }

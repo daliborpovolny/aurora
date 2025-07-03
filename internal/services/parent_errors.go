@@ -6,8 +6,8 @@ type UnknownParentIdError struct {
 	id int64
 }
 
-func (e UnknownParentIdError) Error() string {
+func (e *UnknownParentIdError) Error() string {
 	return fmt.Sprintf("unknown Parent id: %d", e.id)
 }
 
-var UnknownParentIdErr error = UnknownParentIdError{}
+var UnknownParentIdErr error = &UnknownParentIdError{}

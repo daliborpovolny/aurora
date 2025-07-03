@@ -25,7 +25,7 @@ func (t ClassServiceStruct) ListClasses(ctx context.Context) ([]gen.ListClassesR
 func (t ClassServiceStruct) GetClass(classId int64, ctx context.Context) (gen.GetClassRow, error) {
 	class, err := db.Queries.GetClass(ctx, classId)
 	if err == sql.ErrNoRows {
-		return gen.GetClassRow{}, UnknownClassIdError{classId}
+		return gen.GetClassRow{}, &UnknownClassIdError{classId}
 	}
 	return class, nil
 }

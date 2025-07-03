@@ -25,7 +25,7 @@ func (t TeacherServiceStruct) ListTeachers(ctx context.Context) ([]gen.ListTeach
 func (t TeacherServiceStruct) GetTeacher(teacherId int64, ctx context.Context) (gen.GetTeacherRow, error) {
 	teacher, err := db.Queries.GetTeacher(ctx, teacherId)
 	if err == sql.ErrNoRows {
-		return gen.GetTeacherRow{}, UnknownTeacherIdError{teacherId}
+		return gen.GetTeacherRow{}, &UnknownTeacherIdError{teacherId}
 	}
 	return teacher, nil
 }

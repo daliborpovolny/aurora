@@ -26,7 +26,7 @@ func (t StudentServiceStruct) GetStudent(studentId int64, ctx context.Context) (
 	student, err := db.Queries.GetStudent(ctx, studentId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return gen.GetStudentRow{}, UnknownStudentIdError{studentId}
+			return gen.GetStudentRow{}, &UnknownStudentIdError{studentId}
 		}
 		return gen.GetStudentRow{}, err
 	}
