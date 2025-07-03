@@ -18,7 +18,6 @@ type UserServicer interface {
 	ListUsers(ctx context.Context) ([]gen.User, error)
 	Register(params RegisterParams, ctx context.Context) (*http.Cookie, error)
 	Login(params LoginParams, ctx context.Context) (*http.Cookie, error)
-	GetAuthInfo(cookie string, ctx context.Context) (AuthInfo, error)
 }
 
 var UserService UserServicer = UserServiceStruct{}
@@ -140,38 +139,4 @@ func (u UserServiceStruct) Login(params LoginParams, ctx context.Context) (*http
 	}
 
 	return &cookie, nil
-}
-
-type AuthInfo struct {
-	Session  gen.Session
-	User     gen.User
-	UserType string
-}
-
-func (u UserServiceStruct) GetAuthInfo(cookie string, ctx context.Context) (AuthInfo, error) {
-
-	authInfo, err := db.Queries.GetUserBySessionCookie(ctx, cookie)
-	if err != nil {
-		return AuthInfo{}, err
-	}
-
-	userType, err := db.Queries.GetUserType(ctx, authInfo.UserID)
-
-	return AuthInfo{
-		Session: gen.Session{
-			ID:        authInfo.ID,
-			UserID:    authInfo.UserID,
-			Cookie:    cookie,
-			CreatedAt: authInfo.CreatedAt,
-			ExpiresAt: authInfo.ExpiresAt,
-		},
-		User: gen.User{
-			ID:        authInfo.UserID,
-			FirstName: authInfo.FirstName,
-			LastName:  authInfo.LastName,
-			Hash:      authInfo.Hash,
-			Email:     authInfo.Email,
-		},
-		UserType: userType,
-	}, nil
 }

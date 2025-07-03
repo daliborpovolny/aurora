@@ -3,10 +3,9 @@ package handlers
 import (
 	db "aurora/database"
 	gen "aurora/database/gen"
-	"database/sql"
 
 	"aurora/internal"
-	"aurora/internal/services"
+	"aurora/internal/auth"
 
 	"context"
 	"net/http"
@@ -20,19 +19,27 @@ type PublicHandler struct {
 type PublicDeps struct {
 	Q   *gen.Queries
 	Ctx context.Context
+	A   *auth.AuthInfo
 }
 
 func NewPublicHandler(f func(
-	h PublicHandler,
+	d PublicDeps,
 	w http.ResponseWriter,
 	r *http.Request)) internal.CustomHandler {
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		h := PublicHandler{
+
+		authInfo, err := auth.AuthService.Authenticate(r)
+		if err != http.ErrNoCookie && err != auth.InvalidCookieErr {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		d := PublicDeps{
 			Q:   db.Queries,
 			Ctx: r.Context(),
+			A:   authInfo,
 		}
-		f(h, w, r)
+		f(d, w, r)
 	}
 }
 
@@ -50,22 +57,16 @@ func NewPrivateHandler(f PrivateHandler) internal.CustomHandler {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		cookie, err := r.Cookie("session_cookie")
+		authInfo, err := auth.AuthService.Authenticate(r)
 		if err != nil {
-			if err == http.ErrNoCookie {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
-			http.Error(w, "Server error", http.StatusInternalServerError)
-		}
-
-		authInfo, err := services.UserService.GetAuthInfo(cookie.Value, r.Context())
-		if err != nil {
-			if err == sql.ErrNoRows {
-				http.Error(w, "Invalid cookie", http.StatusForbidden)
+			if err == auth.InvalidCookieErr {
+				http.Error(w, "invalid cookie, log in again", http.StatusUnauthorized)
+			} else if err == http.ErrNoCookie {
+				http.Error(w, "no cookie, log in", http.StatusUnauthorized)
 			} else {
-				panic(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
+			return
 		}
 
 		d := PrivateDeps{
