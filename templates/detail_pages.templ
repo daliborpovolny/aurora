@@ -1,8 +1,13 @@
 package templates
 
 import "aurora/database/gen"
+import "aurora/internal/auth"
 
-templ StudentDetail(student database.GetStudentRow, class database.GetClassRow, classTeacher database.GetTeacherRow) {
+templ StudentDetail(student database.GetStudentRow, class database.GetClassRow, classTeacher database.GetTeacherRow, a *auth.AuthInfo) {
+    @base(student.FirstName+" "+student.LastName, a, studentDetail(student, class, classTeacher))
+}
+
+templ studentDetail(student database.GetStudentRow, class database.GetClassRow, classTeacher database.GetTeacherRow) {
     <div>
         <h3>Student</h3>
 

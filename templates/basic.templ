@@ -1,11 +1,13 @@
 package templates
 
+import "aurora/internal/auth"
+
 
 import database "aurora/database/gen"
 
 
-templ Home() {
-    @base("home", home())
+templ Home(a *auth.AuthInfo) {
+    @base("home", a, home())
 }
 
 templ home() {
@@ -14,22 +16,8 @@ templ home() {
     </div>
 }
 
-templ Navbar() {
-    <nav>
-        <ul>
-            <li> <a href="/users">Users</a> </li>
-            <li> <a href="/students">Students</a> </li>
-            <li> <a href="/teachers">Teachers</a> </li>
-            <li> <a href="/admins">Admins</a> </li>
-            <li> <a href="/register">Register</a> </li>
-            <li> <a href="/login">Log In</a> </li>
-        </ul>
-    </nav>
-}
-
-
 templ Register() {
-    @base("Register:", register())
+    @base("Register:", nil, register())
 }
 
 templ register() {
@@ -53,11 +41,11 @@ templ register() {
 }
 
 templ Login() {
-    @base("Log In:", login())
+    @base("Log In:", nil, login())
 }
 
 templ login() {
-    <form>
+    <form method="post">
         <h2>Log In</h2>
 
         <label for="email">Email:</label><br>
@@ -70,8 +58,8 @@ templ login() {
     </form>
 }
 
-templ StudentInfo(s database.GetStudentRow) {
-    @base("Student:", studentInfo(s))
+templ StudentInfo(student database.GetStudentRow, a *auth.AuthInfo) {
+    @base("Student:", a, studentInfo(student))
 }
 
 templ studentInfo(s database.GetStudentRow) {

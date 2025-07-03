@@ -1,11 +1,12 @@
 package templates
 
 import "strconv"
+import "aurora/internal/auth"
 
 import database "aurora/database/gen"
 
-templ ListUsers(users []database.User) {
-    @base("Users", listUsers(users))
+templ ListUsers(users []database.User, a *auth.AuthInfo) {
+    @base("Users", a, listUsers(users))
 }
 
 templ listUsers(users []database.User) {
@@ -31,8 +32,8 @@ templ listUsers(users []database.User) {
     </div>
 }
 
-templ ListStudents(students []database.ListStudentsRow) {
-    @base("Students", listStudents(students))
+templ ListStudents(students []database.ListStudentsRow, a *auth.AuthInfo) {
+    @base("Students", a, listStudents(students))
 }
 
 templ listStudents(students []database.ListStudentsRow) {
@@ -58,8 +59,8 @@ templ listStudents(students []database.ListStudentsRow) {
     </div>
 }
 
-templ ListTeachers(teachers []database.ListTeachersRow) {
-    @base("Teachers:", listTeachers(teachers))
+templ ListTeachers(teachers []database.ListTeachersRow, a *auth.AuthInfo) {
+    @base("Teachers:", a, listTeachers(teachers))
 }
 
 templ listTeachers(teachers []database.ListTeachersRow) {
@@ -85,8 +86,8 @@ templ listTeachers(teachers []database.ListTeachersRow) {
     </div>
 }
 
-templ ListParents(parents []database.ListParentsRow) {
-    @base("Parents:", listParents(parents))
+templ ListParents(parents []database.ListParentsRow, a *auth.AuthInfo) {
+    @base("Parents:", a, listParents(parents))
 }
 
 templ listParents(parents []database.ListParentsRow) {
@@ -113,8 +114,8 @@ templ listParents(parents []database.ListParentsRow) {
 
 }
 
-templ ListAdmins(admins []database.ListAdminsRow) {
-    @base("Admins:", listAdmins(admins))
+templ ListAdmins(admins []database.ListAdminsRow, a *auth.AuthInfo) {
+    @base("Admins:", a, listAdmins(admins))
 }
 
 templ listAdmins(admins []database.ListAdminsRow) {

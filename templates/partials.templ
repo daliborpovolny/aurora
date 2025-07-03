@@ -1,12 +1,41 @@
 package templates
 
 import "time"
+import "aurora/internal/auth"
 
 templ ErrorBox(message string) {
     <div>
         <h2> Error has occurred: </h2>
         <h3> { message } </h3>
     </div>
+}
+
+templ navbar(authInfo *auth.AuthInfo) {
+    <nav>
+        <ul>
+            <li><a href="/users">Users</a></li>
+            <li><a href="/students">Students</a></li>
+            <li><a href="/teachers">Teachers</a></li>
+            <li><a href="/admins">Admins</a></li>
+
+            if authInfo == nil {
+            <li><a href="/register">Register</a></li>
+            <li><a href="/login">Log In</a></li>
+            }
+
+            switch authInfo.UserType {
+                case "teacher":
+                <li><a href="/teacher/hours">Hours</a></li>
+                case "student":
+                <li><a href="/homework">Homework</a></li>
+                case "admin":
+                <li><a href="/homework">Manage</a></li>
+                default:
+                <li><a href="/homework">Finish setup</a></li>
+            }
+
+        </ul>
+    </nav>
 }
 
 var year = time.Now().Year()
@@ -19,7 +48,7 @@ templ footer() {
     </footer>
 }
 
-templ base(title string, content templ.Component) {
+templ base(title string, authInfo *auth.AuthInfo, content templ.Component) {
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -31,7 +60,7 @@ templ base(title string, content templ.Component) {
 
     </head>
     <body>
-        @Navbar()
+        @navbar(authInfo)
         <main>
             @content
         </main>
