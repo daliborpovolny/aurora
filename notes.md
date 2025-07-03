@@ -1,24 +1,23 @@
 # To do
 
-restructure to include folders like:
-/internal -> /handlers, /servicer, /utils, /auth, /tests
-/templates -> /partials, /layouts
-/database -> /gen, queries.sql, schema.sql
-/static
-/config -> air.toml, ...
+- restructure to include folders like:
+	- /config -> air.toml, ...
 
-add openapi
+- utils.Decode crashes if given not a pointer - TODO WHOLE REWRITE MUST UNDERSTAND THE CODE THIS TIME !!!!
+- add openapi
+- change handlers to use auth service and include authinfo in publicDeps, require authInfo in privateDeps
+- create custom something (handlers?) that require specific user type
+- add tests - a lot of them - crud operations on user, teacher, student, admin, parent
+- add AuthInfo to every template -> conditional navbar based on userType, my account page
 
 
 # SQL FORMAT
-- separate into individual files
+- separate queries into individual files
 - all tables are in the singular case
 
 
-# Handlers
-- public, private
-- maybe json and html variants?
-- modify handlers to return error
-	- log the error
-	- error should be a struct with a message and status code
-	- return the error to the client in appropriate format - html / json 
+# DOCKER
+- dockirize the app
+
+# OPENAPI
+- include openapi documentation
