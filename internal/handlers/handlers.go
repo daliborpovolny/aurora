@@ -30,8 +30,10 @@ func NewPublicHandler(f func(
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		authInfo, err := auth.AuthService.Authenticate(r)
-		if err != http.ErrNoCookie && err != auth.InvalidCookieErr {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err != nil {
+			if err != http.ErrNoCookie && err != auth.InvalidCookieErr {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 		}
 
 		d := PublicDeps{
@@ -44,11 +46,9 @@ func NewPublicHandler(f func(
 }
 
 type PrivateDeps struct {
-	Q        *gen.Queries
-	Ctx      context.Context
-	User     gen.User
-	Session  gen.Session
-	UserType string
+	Q   *gen.Queries
+	Ctx context.Context
+	A   *auth.AuthInfo
 }
 
 type PrivateHandler func(d PrivateDeps, w http.ResponseWriter, r *http.Request)
@@ -70,10 +70,9 @@ func NewPrivateHandler(f PrivateHandler) internal.CustomHandler {
 		}
 
 		d := PrivateDeps{
-			Q:       db.Queries,
-			Ctx:     r.Context(),
-			User:    authInfo.User,
-			Session: authInfo.Session,
+			Q:   db.Queries,
+			Ctx: r.Context(),
+			A:   authInfo,
 		}
 
 		f(d, w, r)

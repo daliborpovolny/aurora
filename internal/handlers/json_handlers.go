@@ -6,12 +6,13 @@ import (
 	"net/http"
 )
 
-type JsonError struct {
-	Status  int    `json:"status"`
-	Message string `json:"message"`
+type JsonError interface {
+	Status() int
+	Message() string
+	Error() string
 }
 
-type PublicJsonHandler func(d PublicDeps, w http.ResponseWriter, r *http.Request) *JsonError
+type PublicJsonHandler func(d PublicDeps, w http.ResponseWriter, r *http.Request) JsonError
 
 func NewPublicJsonHandler(f PublicJsonHandler) http.HandlerFunc {
 
@@ -22,7 +23,16 @@ func NewPublicJsonHandler(f PublicJsonHandler) http.HandlerFunc {
 		}
 		err := f(d, w, r)
 		if err != nil {
-			json.NewEncoder(w).Encode(*err)
+
+			errorMsg := struct {
+				Status  int    `json:"status"`
+				Message string `json:"message"`
+			}{
+				err.Status(),
+				err.Error(),
+			}
+
+			json.NewEncoder(w).Encode(errorMsg)
 		}
 	}
 }
